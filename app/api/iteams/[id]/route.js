@@ -1,0 +1,53 @@
+'use server'
+import dbConnect from "@/app/lib/dbconnect";
+import { ObjectId } from "mongodb";
+
+
+export async function GET(reques, { params }) {
+  const {id} = await params;
+
+  try {
+    const collection = await dbConnect('nextJs');
+    const item = await collection.findOne({ _id: new ObjectId(id) });
+
+    return Response.json(item);
+  } catch (error) {
+    return Response.json({ error: "Server error" }, { status: 500 });
+  }
+}
+
+
+
+
+
+export async function PUT(req, { params }) {
+  const { id } = params;
+
+  if (!ObjectId.isValid(id)) {
+    return Response.json({ error: 'Invalid ID' }, { status: 400 });
+  }
+
+  const updatedFields = await req.json(); // await and no destructuring
+
+  if (!updatedFields || Object.keys(updatedFields).length === 0) {
+    return Response.json({ error: 'No fields to update' }, { status: 400 });
+  }
+
+  const collection = await dbConnect('nextJs'); // ensure this returns a collection
+  const result = await collection.updateOne(
+    { _id: new ObjectId(id) },
+    { $set: updatedFields }
+  );
+
+  return Response.json({ modifiedCount: result.modifiedCount });
+}
+
+// ---ok ace--
+// DELETE: Delete an item by ID
+export async function DELETE(req, { params }) {
+  const { id } = params;
+  const collection = await dbConnect('nextJs');
+  const result = await collection.deleteOne({ _id: new ObjectId(id) });
+  return Response.json({ deletedCount: result.deletedCount });
+}
+
