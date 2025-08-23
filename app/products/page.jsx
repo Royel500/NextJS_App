@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { Pencil, Trash2, View } from 'lucide-react'
 import Swal from 'sweetalert2'
 import Link from 'next/link'
+import OrderButton from '../Components/OrderButton'
 export const dynamic = 'force-dynamic'
 export default function Page() {
   const [products, setProducts] = useState([])
@@ -102,6 +103,7 @@ export default function Page() {
                 <span className="badge badge-primary">Category: {item.category || 'N/A'}</span>
                 <span className="badge badge-secondary">Price: ${item.price || '0.00'}</span>
               </div>
+               <OrderButton item={item} />
             </div>
 
             <div className="absolute top-2 right-2 flex space-x-2  transition">

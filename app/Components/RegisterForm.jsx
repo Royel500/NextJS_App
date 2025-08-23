@@ -1,30 +1,59 @@
 'use client'
 import React, { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import Swal from 'sweetalert2'
 import { registerUser } from '../api/auth/action/registerUser'
 
 export default function RegisterForm() {
   const [loading, setLoading] = useState(false)
+  const router = useRouter()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     const form = e.target
-    const userName = form.name.value
-    const userEmail = form.email.value
+    const userName = form.name.value.trim()
+    const userEmail = form.email.value.trim()
     const userPassword = form.password.value
 
-    // Add registration date
-    const createdAt = new Date().toISOString()
+    if (!userName || !userEmail || !userPassword) {
+      Swal.fire('Error', 'Please fill in all fields', 'error')
+      return
+    }
 
-    const payload = { userName, userEmail, userPassword, createdAt }
-    console.log(payload)
+    const payload = {
+      userName,
+      userEmail,
+      userPassword,
+      role: 'user', 
+      createdAt: new Date().toISOString()
+    }
 
     try {
       setLoading(true)
       const result = await registerUser(payload)
-      console.log(result)
-    } catch (error) {
-      console.error(error)
-      alert(error.response?.data?.message || 'Something went wrong')
+
+      if (result.error) {
+        Swal.fire({
+          title: 'User Already Exists!',
+          text: result.message,
+          icon: 'error',
+          confirmButtonText: 'Go to Login'
+        }).then(() => {
+          router.push('/api/auth/signin') // redirect to login page
+        })
+      } else {
+        Swal.fire({
+          title: 'Registration Successful!',
+          text: 'Your account has been created.',
+          icon: 'success',
+          confirmButtonText: 'Go to Home'
+        }).then(() => {
+          router.push('/')
+        })
+      }
+    } catch (err) {
+      Swal.fire('Error', 'Something went wrong. Please try again.', 'error')
+      console.error(err)
     } finally {
       setLoading(false)
     }

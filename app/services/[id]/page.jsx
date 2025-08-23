@@ -60,7 +60,7 @@ export default function serviceDetailsPAge({ params }) {
   }
 ];
 
-  const singleData = services.find((data) => data.id === React.use(params.id))
+  const singleData = services.find((data) => data?.id ===(params?.id))
 
   return (
     <div className="lg:flex py-5 items-center justify-center min-h-screen bg-gray-100 lg:p-8">

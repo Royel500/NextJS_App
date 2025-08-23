@@ -10,8 +10,10 @@ export default function UserInfo() {
 
   return (
     <div>
-      <p><b>Name:</b> {session.user.name}</p>
-      <p><b>Email:</b> {session.user.email}</p>
+      <p><b>Name:</b> {session.user?.userName}</p>   {/* <- changed */}
+      <p><b>Email:</b> {session.user?.email}</p>
+      <p><b>Role:</b> {session.user?.role}</p>
+      <p><b>ID:</b> {session.user?.id}</p>
       <pre>{JSON.stringify(session, null, 2)}</pre>
     </div>
   )
