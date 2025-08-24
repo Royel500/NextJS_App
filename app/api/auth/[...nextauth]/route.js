@@ -18,8 +18,8 @@ const handler = NextAuth({
         const registeredUser = {
           name: credentials?.name,
           password: credentials?.password, // this should match the registered password
-          role: "user",
-          email: credentials?.email || "example@email.com"
+          role: "admin",
+          email: credentials?.email 
         };
 
         if (
@@ -40,27 +40,27 @@ const handler = NextAuth({
   ],
 
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token. name = user.name;
-        token.role = user.role;
-        token.email = user.email;
-        token.id = user.id;
-      }
-      return token;
-    },
+   async jwt({ token, user }) {
+  if (user) {
+    token.name = user.name;
+    token.role = user.role;  // important for your middleware
+    token.email = user.email;
+    token.id = user.id;
+  }
+  return token;
+},
+async session({ session, token }) {
+  if (token) {
+    session.user = {
+      name: token.name,
+      role: token.role,   // now accessible client-side and middleware
+      email: token.email,
+      id: token.id
+    };
+  }
+  return session;
+}
 
-    async session({ session, token }) {
-      if (token) {
-        session.user = {
-          name: token.name,
-          role: token.role,
-          email: token.email,
-          id: token.id
-        };
-      }
-      return session;
-    }
   }
 });
 

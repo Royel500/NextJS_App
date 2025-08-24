@@ -11,6 +11,28 @@ export default function AddProducts({ params }) {
   const [useFallback, setUseFallback] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [productId, setProductId] = useState(null);
+  const [formData, setFormData] = useState({
+    productName: '',
+    productDescription: '',
+    price: '',
+    category: '',
+    imageUrl: '',
+    brand: '',
+    stockQuantity: '',
+    regularPrice: '',
+    todayPrice: '',
+    discountValue: '',
+    discountType: 'percentage',
+    sku: '',
+    weight: '',
+    dimensions: '',
+    colors: '',
+    sizes: '',
+    tags: '',
+    isFeatured: false,
+    isActive: true,
+    lowStockThreshold: '5'
+  });
 
   // Check if we're in edit mode
   useEffect(() => {
@@ -27,12 +49,28 @@ export default function AddProducts({ params }) {
       const res = await fetch(`http://localhost:3000/api/iteams/${id}`);
       if (res.ok) {
         const product = await res.json();
-        // Pre-fill form with product data
-        document.querySelector('input[name="productName"]').value = product.productName || '';
-        document.querySelector('textarea[name="productDescription"]').value = product.productDescription || '';
-        document.querySelector('input[name="price"]').value = product.price || '';
-        document.querySelector('input[name="category"]').value = product.category || '';
-        document.querySelector('input[name="imageUrl"]').value = product.imageUrl || '';
+        setFormData({
+          productName: product.productName || '',
+          productDescription: product.productDescription || '',
+          price: product.price || '',
+          category: product.category || '',
+          imageUrl: product.imageUrl || '',
+          brand: product.brand || '',
+          stockQuantity: product.stockQuantity || '',
+          regularPrice: product.regularPrice || '',
+          todayPrice: product.todayPrice || '',
+          discountValue: product.discountValue || '',
+          discountType: product.discountType || 'percentage',
+          sku: product.sku || '',
+          weight: product.weight || '',
+          dimensions: product.dimensions || '',
+          colors: product.colors || '',
+          sizes: product.sizes || '',
+          tags: product.tags || '',
+          isFeatured: product.isFeatured || false,
+          isActive: product.isActive !== undefined ? product.isActive : true,
+          lowStockThreshold: product.lowStockThreshold || '5'
+        });
         
         if (product.imageUrl) {
           setImagePreview(product.imageUrl);
@@ -41,6 +79,14 @@ export default function AddProducts({ params }) {
     } catch (error) {
       console.error('Error fetching product data:', error);
     }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
   };
 
   const handleImageChange = (e) => {
@@ -103,14 +149,8 @@ export default function AddProducts({ params }) {
     e.preventDefault();
     setIsLoading(true);
     
-    const form = e.target;
-    const productName = form.productName.value;
-    const productDescription = form.productDescription.value;
-    const price = form.price.value;
-    const category = form.category.value;
-    
     try {
-      let imageUrl = form.imageUrl.value || '';
+      let imageUrl = formData.imageUrl || '';
       
       // Try to upload image if a new file was selected
       if (imageFile && !useFallback) {
@@ -139,7 +179,7 @@ export default function AddProducts({ params }) {
         }
       }
 
-      const payload = { productName, productDescription, price, category, imageUrl };
+      const payload = { ...formData, imageUrl };
       
       let res;
       if (isEditMode) {
@@ -184,8 +224,30 @@ export default function AddProducts({ params }) {
           });
           
           if (!isEditMode) {
-            form.reset();
+            setFormData({
+              productName: '',
+              productDescription: '',
+              price: '',
+              category: '',
+              imageUrl: '',
+              brand: '',
+              stockQuantity: '',
+              regularPrice: '',
+              todayPrice: '',
+              discountValue: '',
+              discountType: 'percentage',
+              sku: '',
+              weight: '',
+              dimensions: '',
+              colors: '',
+              sizes: '',
+              tags: '',
+              isFeatured: false,
+              isActive: true,
+              lowStockThreshold: '5'
+            });
             setImagePreview(null);
+            setImageFile(null);
           }
           
           router.push('/products');
@@ -206,65 +268,325 @@ export default function AddProducts({ params }) {
   };
 
   const handleReset = () => {
-    const form = document.querySelector('form');
-    form.reset();
+    setFormData({
+      productName: '',
+      productDescription: '',
+      price: '',
+      category: '',
+      imageUrl: '',
+      brand: '',
+      stockQuantity: '',
+      regularPrice: '',
+      todayPrice: '',
+      discountValue: '',
+      discountType: 'percentage',
+      sku: '',
+      weight: '',
+      dimensions: '',
+      colors: '',
+      sizes: '',
+      tags: '',
+      isFeatured: false,
+      isActive: true,
+      lowStockThreshold: '5'
+    });
     setImagePreview(null);
     setImageFile(null);
     setUseFallback(false);
   };
 
+  // Calculate discount percentage if both regular price and today's price are provided
+  const calculateDiscount = () => {
+    if (formData.regularPrice && formData.todayPrice) {
+      const regular = parseFloat(formData.regularPrice);
+      const today = parseFloat(formData.todayPrice);
+      if (regular > today) {
+        return Math.round(((regular - today) / regular) * 100);
+      }
+    }
+    return 0;
+  };
+
+  const discountPercentage = calculateDiscount();
+
   return (
-    <div className='min-h-screen flex justify-center items-center bg-gradient-to-br from-blue-100 to-purple-200 px-4 py-10'>
-      <div className="w-full max-w-md">
+    <div className='min-h-screen bg-gradient-to-br from-blue-100 to-purple-200 px-4 py-10'>
+      <div className="max-w-4xl mx-auto">
         <form onSubmit={handleSubmit} className="card shadow-2xl bg-white">
           <div className="card-body space-y-4">
             <h2 className="text-2xl font-bold text-center text-gray-800">
               {isEditMode ? 'Edit Product' : 'Add a Product'}
             </h2>
 
-            <div>
-              <label className="label font-medium">Product Name</label>
-              <input type="text" name='productName' className="input input-bordered w-full" placeholder="Enter product name" required />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Basic Information */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold border-b pb-2">Basic Information</h3>
+                
+                <div>
+                  <label className="label font-medium">Product Name *</label>
+                  <input 
+                    type="text" 
+                    name="productName" 
+                    value={formData.productName}
+                    onChange={handleInputChange}
+                    className="input input-bordered w-full" 
+                    placeholder="Enter product name" 
+                    required 
+                  />
+                </div>
+
+                <div>
+                  <label className="label font-medium">Description *</label>
+                  <textarea 
+                    name="productDescription" 
+                    value={formData.productDescription}
+                    onChange={handleInputChange}
+                    className="textarea textarea-bordered w-full" 
+                    placeholder="Product description" 
+                    required
+                  ></textarea>
+                </div>
+
+                <div>
+                  <label className="label font-medium">Category *</label>
+                  <input 
+                    type="text" 
+                    name="category" 
+                    value={formData.category}
+                    onChange={handleInputChange}
+                    className="input input-bordered w-full" 
+                    placeholder="e.g., Electronics, Clothing" 
+                    required 
+                  />
+                </div>
+
+                <div>
+                  <label className="label font-medium">Brand</label>
+                  <input 
+                    type="text" 
+                    name="brand" 
+                    value={formData.brand}
+                    onChange={handleInputChange}
+                    className="input input-bordered w-full" 
+                    placeholder="Brand name" 
+                  />
+                </div>
+
+                <div>
+                  <label className="label font-medium">SKU</label>
+                  <input 
+                    type="text" 
+                    name="sku" 
+                    value={formData.sku}
+                    onChange={handleInputChange}
+                    className="input input-bordered w-full" 
+                    placeholder="Stock Keeping Unit" 
+                  />
+                </div>
+              </div>
+
+              {/* Pricing Information */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold border-b pb-2">Pricing & Stock</h3>
+                
+                <div>
+                  <label className="label font-medium">Regular Price ($)</label>
+                  <input 
+                    type="number" 
+                    name="regularPrice" 
+                    value={formData.regularPrice}
+                    onChange={handleInputChange}
+                    className="input input-bordered w-full"
+                    placeholder="Original price" 
+                    step="0.01"
+                    min="0"
+                  />
+                </div>
+
+                <div>
+                  <label className="label font-medium">Today's Price ($) *</label>
+                  <input 
+                    type="number" 
+                    name="todayPrice" 
+                    value={formData.todayPrice}
+                    onChange={handleInputChange}
+                    className="input input-bordered w-full"
+                    placeholder="Current selling price" 
+                    step="0.01"
+                    min="0"
+                    required
+                  />
+                </div>
+
+                {discountPercentage > 0 && (
+                  <div className="bg-amber-100 p-2 rounded">
+                    <span className="font-medium">Discount: {discountPercentage}% off</span>
+                  </div>
+                )}
+
+                <div>
+                  <label className="label font-medium">Stock Quantity *</label>
+                  <input 
+                    type="number" 
+                    name="stockQuantity" 
+                    value={formData.stockQuantity}
+                    onChange={handleInputChange}
+                    className="input input-bordered w-full"
+                    placeholder="Available items" 
+                    min="0"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="label font-medium">Low Stock Threshold</label>
+                  <input 
+                    type="number" 
+                    name="lowStockThreshold" 
+                    value={formData.lowStockThreshold}
+                    onChange={handleInputChange}
+                    className="input input-bordered w-full"
+                    placeholder="Alert when stock reaches this level" 
+                    min="1"
+                  />
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <input 
+                    type="checkbox" 
+                    name="isFeatured" 
+                    checked={formData.isFeatured}
+                    onChange={handleInputChange}
+                    className="checkbox checkbox-primary" 
+                  />
+                  <label className="label font-medium">Feature this product</label>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <input 
+                    type="checkbox" 
+                    name="isActive" 
+                    checked={formData.isActive}
+                    onChange={handleInputChange}
+                    className="checkbox checkbox-primary" 
+                  />
+                  <label className="label font-medium">Product is active</label>
+                </div>
+              </div>
             </div>
 
-            <div>
-              <label className="label font-medium">Description</label>
-              <textarea name='productDescription' className="textarea textarea-bordered w-full" placeholder="Product description" required></textarea>
+            {/* Additional Information */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold border-b pb-2">Additional Details</h3>
+                
+                <div>
+                  <label className="label font-medium">Weight (kg)</label>
+                  <input 
+                    type="number" 
+                    name="weight" 
+                    value={formData.weight}
+                    onChange={handleInputChange}
+                    className="input input-bordered w-full"
+                    placeholder="Product weight" 
+                    step="0.01"
+                    min="0"
+                  />
+                </div>
+
+                <div>
+                  <label className="label font-medium">Dimensions (LxWxH)</label>
+                  <input 
+                    type="text" 
+                    name="dimensions" 
+                    value={formData.dimensions}
+                    onChange={handleInputChange}
+                    className="input input-bordered w-full"
+                    placeholder="e.g., 10x5x2" 
+                  />
+                </div>
+
+                <div>
+                  <label className="label font-medium">Available Colors</label>
+                  <input 
+                    type="text" 
+                    name="colors" 
+                    value={formData.colors}
+                    onChange={handleInputChange}
+                    className="input input-bordered w-full"
+                    placeholder="Comma separated colors" 
+                  />
+                </div>
+
+                <div>
+                  <label className="label font-medium">Available Sizes</label>
+                  <input 
+                    type="text" 
+                    name="sizes" 
+                    value={formData.sizes}
+                    onChange={handleInputChange}
+                    className="input input-bordered w-full"
+                    placeholder="Comma separated sizes" 
+                  />
+                </div>
+
+                <div>
+                  <label className="label font-medium">Tags</label>
+                  <input 
+                    type="text" 
+                    name="tags" 
+                    value={formData.tags}
+                    onChange={handleInputChange}
+                    className="input input-bordered w-full"
+                    placeholder="Comma separated tags" 
+                  />
+                </div>
+              </div>
+
+              {/* Image Upload */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold border-b pb-2">Product Image</h3>
+                
+                <div>
+                  <label className="label font-medium">Upload Image</label>
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={handleImageChange} 
+                    className="file-input file-input-bordered w-full" 
+                    disabled={useFallback}
+                  />
+                </div>
+
+                <div>
+                  <label className="label font-medium">Or Image URL</label>
+                  <input 
+                    type="url" 
+                    name="imageUrl" 
+                    value={formData.imageUrl}
+                    onChange={handleInputChange}
+                    className="input input-bordered w-full" 
+                    placeholder="https://example.com/image.jpg" 
+                  />
+                </div>
+
+                {imagePreview && (
+                  <div className="mt-4">
+                    <label className="label font-medium">Image Preview</label>
+                    <div className="border rounded p-2 flex justify-center">
+                      <img 
+                        src={imagePreview} 
+                        alt="Product preview" 
+                        className="max-h-40 object-contain"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
-            <div>
-              <label className="label font-medium">Price ($)</label>
-              <input type="number" name='price' className="input input-bordered w-full" placeholder="Enter price" required />
-            </div>
-
-            <div>
-              <label className="label font-medium">Category</label>
-              <input type="text" name='category' className="input input-bordered w-full" placeholder="e.g., Electronics, Clothing" required />
-            </div>
-
-            <div>
-              <label className="label font-medium">Product Image</label>
-              <input 
-                type="file" 
-                accept="image/*" 
-                onChange={handleImageChange} 
-                className="file-input file-input-bordered w-full" 
-                disabled={useFallback}
-              />
-          
-            </div>
-
-            <div>
-              <label className="label font-medium">Or Image URL</label>
-              <input 
-                type="url" 
-                name='imageUrl' 
-                className="input input-bordered w-full" 
-                placeholder="https://example.com/image.jpg" 
-              />
-            </div>
-
-            <div className="flex gap-2 mt-4">
+            <div className="flex gap-2 mt-6">
               <button 
                 type="submit" 
                 className="btn btn-primary flex-1"

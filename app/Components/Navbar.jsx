@@ -3,8 +3,12 @@ import Link from 'next/link'
 import React from 'react'
 import LoginButton from './LoginButton'
 import RegisterButton from './RegisterButton'
+import { useSession } from 'next-auth/react'
+import LogOutButton from './LogOutButton'
 
 const Navbar = () => {
+    const { data: session, status } = useSession();
+
   return (
     <div className="navbar bg-base-100 shadow-sm">
       <div className="navbar-start">
@@ -42,10 +46,17 @@ const Navbar = () => {
       </div>
 
       {/* Auth Buttons */}
-      <div className="navbar-end gap-2">
-        <LoginButton />
-        <RegisterButton />
-      </div>
+     <div className="navbar-end gap-2">
+  {session?.user ? (
+    <LogOutButton />
+  ) : (
+    <>
+      <LoginButton />
+      <RegisterButton />
+    </>
+  )}
+</div>
+
     </div>
   )
 }

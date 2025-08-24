@@ -5,8 +5,8 @@ import Swal from 'sweetalert2'
 import { registerUser } from '../api/auth/action/registerUser'
 
 export default function RegisterForm() {
-  const [loading, setLoading] = useState(false)
-  const router = useRouter()
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -30,7 +30,7 @@ export default function RegisterForm() {
 
     try {
       setLoading(true)
-      const result = await registerUser(payload)
+      const result = await registerUser(payload);
 
       if (result.error) {
         Swal.fire({

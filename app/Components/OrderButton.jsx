@@ -53,7 +53,7 @@ const handleOrder = async () => {
           price: service.price || 0,
           userName: formValues.name,
           userEmail: formValues.email,
-          userNumber: formValues.phone  // Changed from number to phone
+          userNumber: formValues.phone  
         })
       })
 
