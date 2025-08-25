@@ -18,7 +18,7 @@ const handler = NextAuth({
         const registeredUser = {
           name: credentials?.name,
           password: credentials?.password, // this should match the registered password
-          role: "admin",
+          role: credentials?.role,
           email: credentials?.email 
         };
 

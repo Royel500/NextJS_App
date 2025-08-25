@@ -1,11 +1,16 @@
+// components/RegisterForm.js
 'use client'
+
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Swal from 'sweetalert2'
 import { registerUser } from '../api/auth/action/registerUser'
+import './index.css'
 
 export default function RegisterForm() {
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e) => {
@@ -14,9 +19,15 @@ export default function RegisterForm() {
     const userName = form.name.value.trim()
     const userEmail = form.email.value.trim()
     const userPassword = form.password.value
+    const userConfirmPassword = form.confirmPassword.value
 
-    if (!userName || !userEmail || !userPassword) {
+    if (!userName || !userEmail || !userPassword || !userConfirmPassword) {
       Swal.fire('Error', 'Please fill in all fields', 'error')
+      return
+    }
+
+    if (userPassword !== userConfirmPassword) {
+      Swal.fire('Error', 'Passwords do not match', 'error')
       return
     }
 
@@ -60,17 +71,104 @@ export default function RegisterForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3 w-80 p-4 border rounded-lg">
-      <input type="text" placeholder="Name" name="name" className="border p-2 rounded" required />
-      <input type="email" placeholder="Email" name="email" className="border p-2 rounded" required />
-      <input type="password" placeholder="Password" name="password" className="border p-2 rounded" required />
-      <button
-        type="submit"
-        disabled={loading}
-        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
-      >
-        {loading ? 'Registering...' : 'Register'}
-      </button>
-    </form>
+    <div className="container">
+      <div className="header">
+        <h2>Sign Up</h2>
+        <p>Create a new account to get started</p>
+      </div>
+      
+      <form onSubmit={handleSubmit} className="register text-left">
+        <div className="form-group">
+          <label htmlFor="name">Full Name</label>
+          <div className="input-with-icon">
+            <i className="fas fa-user"></i>
+            <input 
+              type="text" 
+              id="name" 
+              name="name" 
+              placeholder="Enter your full name" 
+              required 
+            />
+          </div>
+        </div>
+        
+        <div className="form-group">
+          <label htmlFor="email">Email Address</label>
+          <div className="input-with-icon">
+            <i className="fas fa-envelope"></i>
+            <input 
+              type="email" 
+              id="email" 
+              name="email" 
+              placeholder="Enter your email address" 
+              required 
+            />
+          </div>
+        </div>
+        
+        <div className="form-group">
+          <label htmlFor="password">Password</label>
+          <div className="input-with-icon">
+            <i className="fas fa-lock"></i>
+            <input 
+              type={showPassword ? "text" : "password"} 
+              id="password" 
+              name="password" 
+              placeholder="Create a strong password" 
+              required 
+            />
+            <span 
+              className="password-toggle" 
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+            </span>
+          </div>
+        </div>
+        
+        <div className="form-group">
+          <label htmlFor="confirmPassword">Confirm Password</label>
+          <div className="input-with-icon">
+            <i className="fas fa-lock"></i>
+            <input 
+              type={showConfirmPassword ? "text" : "password"} 
+              id="confirmPassword" 
+              name="confirmPassword" 
+              placeholder="Confirm your password" 
+              required 
+            />
+            <span 
+              className="password-toggle" 
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            >
+              <i className={`fas ${showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+            </span>
+          </div>
+        </div>
+        
+        <button
+          type="submit"
+          disabled={loading}
+          className="register-btn"
+        >
+          {loading ? (
+            <>
+              <i className="fas fa-spinner fa-spin"></i>
+              Registering...
+            </>
+          ) : (
+            'Register'
+          )}
+        </button>
+        
+        <div className="terms">
+          By signing up, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+        </div>
+        
+        <div className="login-link">
+          Already have an account? <a href="/api/auth/signin">Login</a>
+        </div>
+      </form>
+    </div>
   )
 }

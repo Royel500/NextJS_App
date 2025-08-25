@@ -18,7 +18,7 @@ export default function Page() {
 
   const fetchProducts = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/iteams")
+      const res = await fetch("/api/iteams")
       const data = await res.json()
       setProducts(data)
     } catch (error) {
@@ -40,7 +40,7 @@ export default function Page() {
 
     if (result.isConfirmed) {
       try {
-        const res = await fetch(`http://localhost:3000/api/iteams/${id}`, {
+        const res = await fetch(`/api/iteams/${id}`, {
           method: 'DELETE',
         })
 
@@ -61,45 +61,71 @@ export default function Page() {
     setShowModal(true)
   }
 
-  const handleModalSubmit = async (e) => {
-    e.preventDefault()
-    const form = e.target
-    const updatedProduct = {
-      productName: form.productName.value,
-      productDescription: form.productDescription.value,
-      price: parseFloat(form.price.value),
-      category: form.category.value,
-      imageUrl: form.imageUrl.value,
-      regularPrice: parseFloat(form.regularPrice.value) || 0,
-      todayPrice: parseFloat(form.todayPrice.value) || parseFloat(form.price.value),
-      discountValue: form.discountValue.value,
-      discountType: form.discountType.value,
-      stockQuantity: parseInt(form.stockQuantity.value) || 0,
-      brand: form.brand.value,
-      sku: form.sku.value,
-    }
-
-    try {
-      const res = await fetch(`http://localhost:3000/api/iteams/${editingProduct._id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(updatedProduct)
-      })
-
-      if (res.ok) {
-        Swal.fire('Updated!', 'Product updated successfully.', 'success')
-        setShowModal(false)
-        setEditingProduct(null)
-        fetchProducts()
-      } else {
-        throw new Error('Update failed')
-      }
-    } catch (error) {
-      Swal.fire('Error', 'Failed to update product.', 'error')
-    }
+const handleModalSubmit = async (e) => {
+  e.preventDefault()
+  const form = e.target
+  const updatedProduct = {
+    productName: form.productName.value,
+    productDescription: form.productDescription.value,
+    price: parseFloat(form.regularPrice.value),
+    category: form.category.value,
+    imageUrl: form.imageUrl.value,
+    regularPrice: parseFloat(form.regularPrice.value) || 0,
+    todayPrice: parseFloat(form.todayPrice.value) || parseFloat(form.price.value),
+    stockQuantity: parseInt(form.stockQuantity.value) || 0,
+    brand: form.brand.value,
+    sku: form.sku.value,
   }
+
+try {
+  const res = await fetch(`/api/iteams/${editingProduct._id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(updatedProduct)
+  });
+
+  const data = await res.json();
+  console.log("API response status:", res.status);
+  console.log("API response data:", data);
+
+  if (!res.ok) {
+    // If the backend sent an error
+    throw new Error(data.message || 'Update failed');
+  }
+
+  // Check if a document was actually modified
+  // Assuming your API returns the updated document
+  if (data && Object.keys(data).length > 0) {
+    await Swal.fire({
+      title: 'Updated!',
+      text: 'Product updated successfully.',
+      icon: 'success',
+      confirmButtonText: 'OK'
+    });
+  } else {
+    await Swal.fire({
+      title: 'No Changes',
+      text: 'No modifications were made to the product.',
+      icon: 'info',
+      confirmButtonText: 'OK'
+    });
+  }
+
+  setShowModal(false);
+  setEditingProduct(null);
+  fetchProducts();
+
+} catch (error) {
+    console.error(error)
+    Swal.fire({
+      title: 'Error',
+      text: error.message || 'Failed to update product.',
+      icon: 'error',
+      confirmButtonText: 'OK',
+    })
+  }
+}
+
 
   // Calculate discount percentage
   const calculateDiscount = (regularPrice, todayPrice) => {

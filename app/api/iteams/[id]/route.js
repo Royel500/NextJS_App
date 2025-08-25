@@ -18,29 +18,41 @@ export async function GET(reques, { params }) {
 
 
 
-
+// -------projuct---update----------
 
 export async function PUT(req, { params }) {
-  const { id } = params;
+  try {
+    const { id } = params;
 
-  if (!ObjectId.isValid(id)) {
-    return Response.json({ error: 'Invalid ID' }, { status: 400 });
+    if (!ObjectId.isValid(id)) {
+      return Response.json({ error: "Invalid ID" }, { status: 400 });
+    }
+
+    const updatedFields = await req.json();
+
+    if (!updatedFields || Object.keys(updatedFields).length === 0) {
+      return Response.json({ error: "No fields to update" }, { status: 400 });
+    }
+
+    // connect to db + collection
+  const collection = await dbConnect('nextJs');
+
+    const result = await collection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: updatedFields }
+    );
+
+    if (result.matchedCount === 0) {
+      return Response.json({ error: "Product not found" }, { status: 404 });
+    }
+
+    return Response.json({ success: true, modifiedCount: result.modifiedCount });
+  } catch (error) {
+    console.error("PUT error:", error);
+    return Response.json({ error: "Internal Server Error" }, { status: 500 });
   }
-
-  const updatedFields = await req.json(); // await and no destructuring
-
-  if (!updatedFields || Object.keys(updatedFields).length === 0) {
-    return Response.json({ error: 'No fields to update' }, { status: 400 });
-  }
-
-  const collection = await dbConnect('nextJs'); // ensure this returns a collection
-  const result = await collection.updateOne(
-    { _id: new ObjectId(id) },
-    { $set: updatedFields }
-  );
-
-  return Response.json({ modifiedCount: result.modifiedCount });
 }
+
 
 // ---ok ace--
 // DELETE: Delete an item by ID
