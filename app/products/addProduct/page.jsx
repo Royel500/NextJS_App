@@ -46,7 +46,7 @@ export default function AddProducts({ params }) {
 
   const fetchProductData = async (id) => {
     try {
-      const res = await fetch(`http://localhost:3000/api/iteams/${id}`);
+      const res = await fetch(`https://nextjs-flax-nine-40.vercel.app/api/iteams/${id}`);
       if (res.ok) {
         const product = await res.json();
         setFormData({
@@ -184,7 +184,7 @@ export default function AddProducts({ params }) {
       let res;
       if (isEditMode) {
         // Use PATCH method for editing
-        res = await fetch(`http://localhost:3000/api/iteams/${productId}`, {
+        res = await fetch(`https://nextjs-flax-nine-40.vercel.app/api/iteams/${productId}`, {
           method: 'PATCH',
           body: JSON.stringify(payload),
           headers: {
@@ -193,7 +193,7 @@ export default function AddProducts({ params }) {
         });
       } else {
         // Use POST method for adding new product
-        res = await fetch("http://localhost:3000/api/iteams", {
+        res = await fetch("https://nextjs-flax-nine-40.vercel.app/api/iteams", {
           method: 'POST',
           body: JSON.stringify(payload),
           headers: {
@@ -204,7 +204,7 @@ export default function AddProducts({ params }) {
 
       if (res.ok) {
         // Fetch the updated products list
-        const productsRes = await fetch("http://localhost:3000/api/iteams");
+        const productsRes = await fetch("https://nextjs-flax-nine-40.vercel.app/api/iteams");
         const products = await productsRes.json();
 
         if (products.length >= 3 && !isEditMode) {

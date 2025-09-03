@@ -1,6 +1,7 @@
 'use client'
 import { useSession } from 'next-auth/react'
 import React from 'react'
+import contracts from './../contract/page';
 
 export default function UserInfo() {
   const { data: session, status } = useSession();
@@ -10,11 +11,17 @@ export default function UserInfo() {
 
   return (
     <div>
-      <p><b>Name:</b> {session.user?.userName}</p>   {/* <- changed */}
+      <p><b>Name: Developer working on it need 5 days more to complte </b> 
+      {/* {session.user?.userName} */}
+      
+      </p>
+      {
+        console.log(session.user)
+      }
       <p><b>Email:</b> {session.user?.email}</p>
-      <p><b>Role:</b> {session.user?.role}</p>
+      {/* <p><b>Role:</b> {session.user?.role}</p> */}
       <p><b>ID:</b> {session.user?.id}</p>
-      <pre>{JSON.stringify(session, null, 2)}</pre>
+     
     </div>
   )
 }

@@ -4,28 +4,21 @@ import { Pencil, Trash2, View, Star, Zap, Clock } from 'lucide-react'
 import Swal from 'sweetalert2'
 import Link from 'next/link'
 import OrderButtonProduct from '../Components/OrderButtonProduct'
+import useFetchProducts from './fatchdata/page'
+
 
 export const dynamic = 'force-dynamic'
 
 export default function Page() {
-  const [products, setProducts] = useState([])
   const [editingProduct, setEditingProduct] = useState(null)
   const [showModal, setShowModal] = useState(false)
 
+  const { products, loading, fetchProducts } = useFetchProducts();
   useEffect(() => {
     fetchProducts()
   }, [])
 
-  const fetchProducts = async () => {
-    try {
-      const res = await fetch("/api/iteams")
-      const data = await res.json()
-      setProducts(data)
-    } catch (error) {
-      console.error('Error fetching products:', error)
-      Swal.fire('Error', 'Failed to load products.', 'error')
-    }
-  }
+
 
   const handleDelete = async (id) => {
     const result = await Swal.fire({
@@ -150,7 +143,7 @@ try {
   return (
     <div className="min-h-screen bg-base-200 py-10 px-4">
       <h1 className="text-3xl font-bold text-center mb-8">All Products</h1>
-
+     
       {products.length === 0 ? (
         <div className="text-center py-10">
           <p className="text-lg">No products found.</p>
@@ -160,6 +153,8 @@ try {
         </div>
       ) : (
         <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        
+
           {products.map((item) => {
             const discountPercent = calculateDiscount(item.regularPrice, item.todayPrice || item.price);
             const isNew = isNewProduct(item.createdAt);

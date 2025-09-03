@@ -18,7 +18,7 @@ export default function ProductDetails({ params }) {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const res = await fetch(`http://localhost:3000/api/iteams/${id}`)
+        const res = await fetch(`https://nextjs-flax-nine-40.vercel.app/api/iteams/${id}`)
         if (!res.ok) throw new Error('Failed to fetch product')
         const data = await res.json()
         setProduct(data)
