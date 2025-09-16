@@ -60,42 +60,7 @@ A full-stack **product listing and selling website** built with **Next.js**, **M
   * Axios – For HTTP requests.
   * Nodemon – For auto-restarting the server during development.
 
----
 
-## 🔹 Installation & Setup
-
-1. **Clone the repository:**
-
-   ```bash
-   git clone <your-repo-url>
-   cd <project-folder>
-   ```
-
-2. **Install dependencies:**
-
-   ```bash
-   npm install
-   ```
-
-3. **Set up environment variables:**
-   Create a `.env` file in the root directory:
-
-   ```
-   DB_USER=<your-mongodb-username>
-   DB_PASS=<your-mongodb-password>
-   DB_NAME=<your-database-name>
-   JWT_SECRET=<your-jwt-secret>
-   ```
-
-4. **Run the development server:**
-
-   ```bash
-   npm run dev
-   ```
-
-   Visit: `http://localhost:3000`
-
----
 
 ## 🔹 API Endpoints
 
