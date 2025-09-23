@@ -5,7 +5,7 @@ import RegisterButton from './RegisterButton'
 import { useSession } from 'next-auth/react'
 import LogOutButton from './LogOutButton'
 import LoginButton from './LoginButton'
-
+// nothing to add
 const Navbar = () => {
     const { data: session, status } = useSession();
   // Determine dashboard path based on role
