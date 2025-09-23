@@ -86,6 +86,7 @@ const services = [
 
       <Link href={`services/${ser.id}`}>
         <Image
+        
   src={ser.img}
   alt={ser.name}
   width={400}

@@ -1,21 +1,34 @@
+// app/api/auth/action/registerUser.js
 'use server'
 import dbConnect from "@/app/lib/dbconnect";
+import bcrypt from "bcryptjs";
 
 export const registerUser = async (payload) => {
   try {
-    const collection = dbConnect('userCollection');
+    const collection = await dbConnect('userCollection');
 
     // Check if user already exists by email
-    const existingUser = await collection.findOne({ userEmail: payload.userEmail });
+    const existingUser = await collection.findOne({ email: payload.email });
+    console.log("Existing User:", existingUser);
+
     if (existingUser) {
-      // User already exists
       return { error: true, message: "User already exists. Please login instead." };
     }
 
-    // If user does not exist, insert new user
-    const result = await collection.insertOne(payload);
+    // Hash the password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(payload.password, salt);
+
+    // Replace plain password with hashed password
+    const newUser = {
+      ...payload,
+      password: hashedPassword,
+    };
+
+    // Insert new user
+    const result = await collection.insertOne(newUser);
     return { success: true, result };
-    
+
   } catch (error) {
     console.log(error);
     return { error: true, message: "Something went wrong" };

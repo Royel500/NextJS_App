@@ -26,7 +26,7 @@ const Footer = () => {
   href="https://t.me/itisroyel528" 
   target="_blank" 
   rel="noopener noreferrer"
-  class="inline-flex  items-center gap-2"
+  className="inline-flex  items-center gap-2"
 >
   <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="#fff" viewBox="0 0 24 24">
     <path d="M12 0C5.372 0 0 5.372 0 12c0 6.627 5.372 12 12 12s12-5.373 12-12c0-6.628-5.372-12-12-12zm5.574 8.83l-1.748 8.25c-.133.63-.48.78-.97.486l-2.68-1.976-1.293 1.247c-.143.143-.263.263-.54.263l.194-2.73 4.96-4.48c.215-.194-.047-.303-.332-.11l-6.123 3.84-2.64-.825c-.573-.18-.583-.573.12-.84l10.327-3.988c.48-.18.9.113.746.828z"/>
@@ -38,7 +38,7 @@ const Footer = () => {
   href="https://wa.me/8801907226353" 
   target="_blank" 
   rel="noopener noreferrer"
-  class="inline-flex  items-center gap-2"
+  className="inline-flex  items-center gap-2"
 >
  
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#25D366" viewBox="0 0 24 24">
@@ -52,7 +52,7 @@ const Footer = () => {
         href="https://x.com/royel528" 
   target="_blank" 
   rel="noopener noreferrer"
-  class="inline-flex items-center gap-2"
+  className="inline-flex items-center gap-2"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -97,6 +97,7 @@ const Footer = () => {
 
     </div>
   </nav>
+  
 </footer>
     );
 };

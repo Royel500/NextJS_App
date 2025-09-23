@@ -16,28 +16,28 @@ export default function RegisterForm() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     const form = e.target
-    const userName = form.name.value.trim()
-    const userEmail = form.email.value.trim()
-    const userPassword = form.password.value
-    const userConfirmPassword = form.confirmPassword.value
+    const Name = form.name.value.trim()
+    const Email = form.email.value.trim()
+    const Password = form.password.value
+    const ConfirmPassword = form.confirmPassword.value
 
-    if (!userName || !userEmail || !userPassword || !userConfirmPassword) {
+    if (!Name || !Email || !Password || !ConfirmPassword) {
       Swal.fire('Error', 'Please fill in all fields', 'error')
       return
     }
 
-    if (userPassword !== userConfirmPassword) {
+    if (Password !== ConfirmPassword) {
       Swal.fire('Error', 'Passwords do not match', 'error')
       return
     }
 
-    const payload = {
-      userName,
-      userEmail,
-      userPassword,
-      role: 'user', 
-      createdAt: new Date().toISOString()
-    }
+const payload = {
+  name: Name,       // lowercase key
+  email: Email,     // lowercase key
+  password: Password, // lowercase key
+  role: 'user',
+  createdAt: new Date().toISOString()
+}
 
     try {
       setLoading(true)

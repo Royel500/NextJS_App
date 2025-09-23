@@ -1,6 +1,9 @@
+// app/api/auth/[...nextauth]/route.js
+import dbConnect from "@/app/lib/dbconnect";
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-
+import GoogleProvider from "next-auth/providers/google";
+import bcrypt from "bcryptjs";
 
 const handler = NextAuth({
   providers: [
@@ -8,60 +11,58 @@ const handler = NextAuth({
       name: "Credentials",
       credentials: {
         email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
+        password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        console.log("Credential for login", credentials);
+        const collection = await dbConnect('userCollection');
+        const user = await collection.findOne({ email: credentials.email });
 
-        // Check hardcoded or in-memory user (example)
-        // In production, this must be replaced with database or API check
-        const registeredUser = {
-          name: credentials?.name,
-          password: credentials?.password, // this should match the registered password
-          role: credentials?.role,
-          email: credentials?.email 
+        if (!user) return null;
+
+        // Compare hashed password
+        const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
+        if (!isPasswordValid) return null;
+
+        return {
+          id: user._id.toString(),
+          name: user.name,
+          role: user.role,
+          email: user.email,
         };
+      },
+    }),
 
-        if (
-          credentials.name === registeredUser.name &&   
-          credentials.password === registeredUser.password
-        ) {
-          return {
-            id: 1,
-            name: registeredUser.name,
-            role: registeredUser.role,
-            email: registeredUser.email
-          };
-        }
-
-        return null; // login failed
-      }
-    })
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    }),
   ],
 
   callbacks: {
-   async jwt({ token, user }) {
-  if (user) {
-    token.name = user.name;
-    token.role = user.role;  // important for your middleware
-    token.email = user.email;
-    token.id = user.id;
-  }
-  return token;
-},
-async session({ session, token }) {
-  if (token) {
-    session.user = {
-      name: token.name,
-      role: token.role,   // now accessible client-side and middleware
-      email: token.email,
-      id: token.id
-    };
-  }
-  return session;
-}
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+        token.name = user.name;
+        token.email = user.email;
+        token.role = user.role;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      session.user = {
+        id: token.id,
+        name: token.name,
+        email: token.email,
+        role: token.role,
+      };
+      return session;
+    },
+  },
 
-  }
+  pages: {
+    signIn: "/login",
+    error: "/login?error=InvalidCredentials",
+  },
 });
 
 export { handler as GET, handler as POST };

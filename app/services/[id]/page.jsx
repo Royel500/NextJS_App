@@ -1,5 +1,6 @@
 'use client';
 import OrderButton from "@/app/Components/OrderButton";
+import Image from "next/image";
 export default function serviceDetailsPAge({ params }) {
  const services = [
   {
@@ -66,13 +67,17 @@ export default function serviceDetailsPAge({ params }) {
     <div className="lg:flex py-5 items-center justify-center min-h-screen bg-gray-100 lg:p-8">
       <div className="lg:flex bg-white rounded-lg shadow-lg max-w-4xl w-full">
         <div className="lg:w-1/2 p-8 text-left">
-          <p className="text-2xl font-semibold mb-4">{singleData.name}</p>
-          <p className="mb-6 text-gray-700 leading-relaxed">{singleData.description}</p>
-          <p className="font-medium text-gray-500">ID: <span className="text-black">{singleData.id}</span></p>
+          <p className="text-2xl font-semibold mb-4">{singleData?.name}</p>
+          <p className="mb-6 text-gray-700 leading-relaxed">{singleData?.description}</p>
+          <p className="font-medium text-gray-500">ID: <span className="text-black">{singleData?.id}</span></p>
           <OrderButton service={singleData} />
         </div>
         <div className="lg:w-1/2">
-          <img src={singleData.img} alt={singleData.name} className="h-full w-full object-cover rounded-r-lg"/>
+          <Image src={singleData?.img} 
+          width={60}
+          height={50}
+          alt={singleData?.name}
+          className="h-full w-full object-cover rounded-r-lg"/>
         </div>
       </div>
     </div>

@@ -1,10 +1,32 @@
 'use client'
 import Link from "next/link";
 import CountdownSection from "./Components/CountDown";
-import useFetchProducts from "./products/fatchdata/page";
+import Image from 'next/image'
+import { useEffect, useState } from "react";
+import CountdownForHome from "./Components/CountdownFroHome";
 
 export default function Home() {
-    const { products, loading, fetchProducts } = useFetchProducts();
+ const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+    const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch('/api/items', { cache: 'no-store' });
+      if (!res.ok) throw new Error('Failed to fetch products');
+      const data = await res.json();
+      setProducts(data);
+    } catch (err) {
+      console.error('Error fetching products:', err);
+      Swal.fire('Error', 'Failed to load products.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
 
   return (
     <section className="min-h-screen">
@@ -13,7 +35,7 @@ export default function Home() {
   className="relative bg-cover bg-center text-white py-32"
   style={{ backgroundImage: "url('/imgwayer.webp')" }}
 >
-  <div className="container mx-auto px-4 text-center">
+  <div className=" mx-auto px-4 text-center">
     <h1 className="text-5xl md:text-6xl font-bold mb-6">Discover Amazing Products</h1>
     <p className="text-xl mb-8 max-w-2xl mx-auto">
       Find everything you need with our curated collection of premium products at unbeatable prices.
@@ -31,7 +53,7 @@ export default function Home() {
 
       {/* Featured Categories */}
       <div className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4">
+        <div className=" mx-10 px-4">
           <h2 className="text-3xl font-bold text-center mb-12">Shop by Category</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:scale-105">
@@ -67,83 +89,84 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Featured Products */}
-      <div className="py-16">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Featured Products</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {products.map((item) => (
-              
-              <div key={item} className="bg-white rounded-lg shadow-md overflow-hidden">
-              {console.log(item)}
-                <div className="h-48 bg-gray-200 flex items-center justify-center">
-                <img src={item?.imageUrl} className="text-3xl"></img>
+{/* Featured Products */}
+<div className="py-16">
+  <div className=" mx-10 px-4">
+    <h2 className="text-3xl font-bold text-center mb-12">Featured Products</h2>
+    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-8">
+      {(() => {
+        // Better shuffle function
+        const shuffleArray = (array) => {
+          const newArray = [...array];
+          for (let i = newArray.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+          }
+          return newArray;
+        };
+        
+        const featuredProducts = shuffleArray(products.slice(0, 10));
+        
+        return featuredProducts.map((item, index) => (
+          <div key={item._id || item.sku || index} className="bg-white rounded-lg shadow-md overflow-hidden">
+            <div className="h-48 bg-gray-200 relative flex items-center justify-center">
+              <Image
+                src={item?.imageUrl || "https://i.ibb.co/CKTpFTK5/images-2.jpg"}
+                alt={item?.productName}
+                width={300}
+                height={180}
+                unoptimized
+                className="h-50 w-full object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+            </div>
 
+            <div className="p-4">
+              <h3 className="text-lg font-semibold">Premium Product {item?.brand}</h3>
+              <div className="flex items-center mt-2">
+                <div className="flex text-yellow-400">
+                  {"★".repeat(5)}
                 </div>
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold">Premium Product {item?.brand}</h3>
-                  <div className="flex items-center mt-2">
-                    <div className="flex text-yellow-400">
-                      {"★".repeat(5)}
-                    </div>
-                    <span className="text-gray-600 ml-2">(42)</span>
-                  </div>
-                  <div className="mt-3 flex items-center justify-between">
-                    <span className="text-xl font-bold">${ item?.price || item?.regularPrice || item?.todayPrice
-
-}</span>
-
-                    <button className="bg-blue-600 text-white py-2 px-4 rounded-lg 
-                    text-sm hover:bg-blue-700 transition">
-                      Add to Cart
-                    </button>
-                  </div>
-                </div>
+                <span className="text-gray-600 ml-2">(42)</span>
               </div>
-            ))}
+              <div className="mt-3 flex items-center justify-between">
+                <span className="text-xl font-bold">${ item?.price || item?.regularPrice || item?.todayPrice}</span>
+
+                <button className="bg-blue-600 text-white py-2 px-4 rounded-lg 
+                text-sm hover:bg-blue-700 transition">
+                  Add to Cart
+                </button>
+              </div>
+            </div>
           </div>
-          <div className="text-center mt-12">
-            <Link href={'/products'} >
-             <button  className="border-2 border-blue-600 text-blue-600 font-semibold py-3 px-8 rounded-lg hover:bg-blue-600 hover:text-white transition">
-              View All Products
-            </button>
-            </Link>
-           
-          </div>
-        </div>
-      </div>
+        ));
+      })()}
+    </div>
+    <div className="text-center mt-12">
+      <Link href={'/products'} >
+        <button  className="border-2 border-blue-600 text-blue-600 font-semibold py-3 px-8 rounded-lg hover:bg-blue-600 hover:text-white transition">
+          View All Products
+        </button>
+      </Link>
+    </div>
+  </div>
+</div>
+
 
       {/* Promotional Banner */}
       <div className="py-16 bg-blue-50">
-        <div className="container mx-auto px-4 text-center">
+        <div className=" mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-6">Summer Sale</h2>
           <p className="text-xl text-gray-700 mb-8 max-w-2xl mx-auto">
             Enjoy up to 50% off on selected items. Limited time offer!
           </p>
-          <div className="flex justify-center space-x-4">
-            <div className="bg-white rounded-lg p-4 shadow-md">
-              <span className="text-2xl font-bold text-blue-600">05</span>
-              <p>Days</p>
-            </div>
-            <div className="bg-white rounded-lg p-4 shadow-md">
-              <span className="text-2xl font-bold text-blue-600">18</span>
-              <p>Hours</p>
-            </div>
-            <div className="bg-white rounded-lg p-4 shadow-md">
-              <span className="text-2xl font-bold text-blue-600">45</span>
-              <p>Minutes</p>
-            </div>
-            <div className="bg-white rounded-lg p-4 shadow-md">
-              <span className="text-2xl font-bold text-blue-600">22</span>
-              <p>Seconds</p>
-            </div>
-          </div>
+  <CountdownForHome targetDate="2025-12-31T23:59:59" />
+
         </div>
       </div>
 
       {/* Testimonials */}
       <div className="py-16 bg-gray-100">
-        <div className="container mx-auto px-4">
+        <div className=" mx-10 px-4">
           <h2 className="text-3xl font-bold text-center mb-12">What Our Customers Say</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[1, 2, 3].map((item) => (
@@ -152,7 +175,7 @@ export default function Home() {
                   {"★".repeat(5)}
                 </div>
                 <p className="text-gray-700 mb-4">
-                  "I absolutely love the products I purchased. The quality is exceptional and the delivery was super fast!"
+                  I absolutely love the products I purchased. The quality is exceptional and the delivery was super fast!
                 </p>
                 <div className="flex items-center">
                   <div className="h-10 w-10 bg-gray-300 rounded-full mr-3"></div>

@@ -79,7 +79,7 @@ export default function CountdownSection() {
 
   return (
     <div className="py-16 bg-gray-50">
-      <div className="container mx-auto px-4">
+      <div className=" mx-10 px-4">
         <h2 className="text-3xl font-bold text-center mb-4">Limited Time Offers</h2>
         <p className="text-gray-600 text-center mb-12 max-w-2xl mx-auto">
           Don't miss out on these exclusive deals. Offers expire soon!

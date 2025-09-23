@@ -4,12 +4,6 @@ import dbConnect from '@/app/lib/dbconnect';
 import { ObjectId } from 'mongodb';
 import { revalidatePath } from 'next/cache';
 
-// GET: Read all items
-export async function GET() {
-  const collection = await dbConnect('nextJs');
-  const items = await collection.find({}).toArray();
-  return Response.json(items);
-}
 
 
 // Ok Ace----
@@ -21,4 +15,13 @@ export async function POST(req) {
   revalidatePath('/products')
   return Response.json({ insertedId: result.insertedId });
 }
+
+
+// GET: Read all items
+export async function GET() {
+  const collection = await dbConnect('nextJs');
+  const items = await collection.find({}).toArray();
+  return Response.json(items);
+}
+
 

@@ -1,24 +1,28 @@
-// app/products/[id]/page.js
 'use client'
 
 import React, { useEffect, useState } from 'react'
 import { Star, Heart, Shield, Truck, ArrowLeft, Zap, Clock } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import Swal from 'sweetalert2'
+import Image from 'next/image'
+import Link from 'next/link'
 
-export default function ProductDetails({ params }) {
-  const { id } = params;
+export default function ProductDetails( props ) {
+  const { id } = React.use(props.params);
   const [product, setProduct] = useState(null)
+
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [quantity, setQuantity] = useState(1)
   const [selectedImage, setSelectedImage] = useState(0)
   const router = useRouter()
 
+ const [products, setProducts] = useState([]);
+  
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const res = await fetch(`https://nextjs-flax-nine-40.vercel.app/api/iteams/${id}`)
+        const res = await fetch(`/api/items/${id}`)
         if (!res.ok) throw new Error('Failed to fetch product')
         const data = await res.json()
         setProduct(data)
@@ -31,6 +35,26 @@ export default function ProductDetails({ params }) {
 
     fetchProduct()
   }, [id])
+
+    const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch('/api/items', { cache: 'no-store' });
+      if (!res.ok) throw new Error('Failed to fetch products');
+      const data = await res.json();
+      setProducts(data);
+    } catch (err) {
+      console.error('Error fetching products:', err);
+      Swal.fire('Error', 'Failed to load products.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
 
   const calculateDiscount = (regularPrice, todayPrice) => {
     if (!regularPrice || regularPrice <= todayPrice) return 0;
@@ -124,12 +148,16 @@ export default function ProductDetails({ params }) {
           {/* Product Images */}
           <div className="space-y-4">
             <div className="relative">
-              <img
-                src={imageArray[selectedImage]}
-                alt={product.productName}
-                className="w-full h-96 object-contain rounded-lg border"
-              />
-              
+ 
+
+           <Image
+         src={product?.imageUrl || '/placeholder.jpg'}
+        alt={product?.productName || 'Product Image'}
+          width={350}
+          height={700}
+          unoptimized
+          className="w-full h-100 rounded-xl transition-transform duration-300 group-hover:scale-105"
+        />
               {/* Badges */}
               <div className="absolute top-3 left-3 flex flex-col space-y-2">
                 {discountPercent > 0 && (
@@ -160,19 +188,21 @@ export default function ProductDetails({ params }) {
             </div>
             
             {/* Thumbnail Gallery */}
-            {imageArray.length > 1 && (
+            {/* {imageArray.length > 1 && (
               <div className="flex space-x-2 overflow-x-auto py-2">
                 {imageArray.map((img, index) => (
-                  <img
-                    key={index}
+                  <Image
+                
                     src={img}
                     alt={`${product.productName} view ${index + 1}`}
-                    className={`w-16 h-16 object-cover rounded cursor-pointer border-2 ${selectedImage === index ? 'border-primary' : 'border-gray-200'}`}
+              className={`w-16 h-16 object-cover rounded cursor-pointer border-2 ${selectedImage === index ? 'border-primary' : 'border-gray-200'}`}
                     onClick={() => setSelectedImage(index)}
                   />
                 ))}
               </div>
-            )}
+            )} */}
+
+
           </div>
 
           {/* Product Details */}
@@ -228,7 +258,7 @@ export default function ProductDetails({ params }) {
 
             {/* Product Details */}
             <div className="space-y-3">
-              <p className="text-gray-700">{product.productDescription}</p>
+              <p className="text-gray-700 h-20 overflow-auto">{product?.productDescription}</p>
               
               <div className="grid grid-cols-2 gap-3 text-sm">
                 {product.sku && (
@@ -354,17 +384,48 @@ export default function ProductDetails({ params }) {
           <h2 className="text-2xl font-bold mb-4">You Might Also Like</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {/* Placeholder for related products */}
-            {[1, 2, 3, 4].map((item) => (
-              <div key={item} className="card bg-base-100 shadow">
-                <figure>
-                  <div className="h-40 bg-gray-200 animate-pulse"></div>
-                </figure>
-                <div className="card-body p-4">
-                  <div className="h-4 bg-gray-200 animate-pulse mb-2"></div>
-                  <div className="h-3 bg-gray-200 animate-pulse w-3/4"></div>
-                </div>
-              </div>
-            ))}
+  {products.map((item) => (
+  <div key={item._id || item.sku} className="card bg-base-100 shadow rounded-lg overflow-hidden">
+    <figure className="h-40 w-full relative bg-gray-200">
+
+
+<Link href={'/products'}>
+        <Image
+         src={item?.imageUrl || '/placeholder.jpg'}
+        alt={item?.productName || 'Product Image'}
+          width={300}
+          height={200}
+          unoptimized
+          className="h-60 w-full object-cover transition-transform duration-300 group-hover:scale-105"
+        />
+</Link>
+
+
+
+
+    </figure>
+    <div className="card-body p-4">
+      <h2 className="text-lg font-bold text-gray-800 line-clamp-1">
+        {item?.productName || 'No Name'}
+      </h2>
+      {item?.brand && <p className="text-sm text-gray-500">{item.brand}</p>}
+      {item?.category && <p className="text-sm text-gray-400">{item.category}</p>}
+      <div className="mt-2 flex items-center justify-between">
+        <span className="font-semibold text-green-600">
+          ${item?.todayPrice || item?.price || '0.00'}
+        </span>
+        {item?.regularPrice > (item?.todayPrice || item?.price) && (
+          <span className="text-sm text-gray-400 line-through">
+            ${item?.regularPrice}
+          </span>
+        )}
+      </div>
+    </div>
+  </div>
+))}
+
+
+
           </div>
         </div>
       </div>
