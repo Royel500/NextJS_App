@@ -11,7 +11,7 @@ const Navbar = () => {
   // Determine dashboard path based on role
   const dashboardLink = session?.user?.role === 'admin' 
     ? '/admin-dashboard' 
-    : '/users-dashboard'
+    : '/user-dashboard'
 
 
 
