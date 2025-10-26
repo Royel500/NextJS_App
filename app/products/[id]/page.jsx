@@ -1,23 +1,27 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { Star, Heart, Shield, Truck, ArrowLeft, Zap, Clock } from 'lucide-react'
+import { Star, Heart, Shield, Truck, ArrowLeft, Zap, Clock, CreditCard, Smartphone, Building, Wallet } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import Swal from 'sweetalert2'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useSession } from 'next-auth/react'
 
-export default function ProductDetails( props ) {
+export default function ProductDetails(props) {
   const { id } = React.use(props.params);
   const [product, setProduct] = useState(null)
-
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [quantity, setQuantity] = useState(1)
   const [selectedImage, setSelectedImage] = useState(0)
+  const [showPaymentModal, setShowPaymentModal] = useState(false)
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('')
+  const [processingPayment, setProcessingPayment] = useState(false)
   const router = useRouter()
+  const { data: session } = useSession()
 
- const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState([]);
   
   useEffect(() => {
     const fetchProduct = async () => {
@@ -36,7 +40,7 @@ export default function ProductDetails( props ) {
     fetchProduct()
   }, [id])
 
-    const fetchProducts = async () => {
+  const fetchProducts = async () => {
     try {
       setLoading(true);
       const res = await fetch('/api/items', { cache: 'no-store' });
@@ -55,7 +59,6 @@ export default function ProductDetails( props ) {
     fetchProducts();
   }, []);
 
-
   const calculateDiscount = (regularPrice, todayPrice) => {
     if (!regularPrice || regularPrice <= todayPrice) return 0;
     return Math.round(((regularPrice - todayPrice) / regularPrice) * 100);
@@ -70,7 +73,6 @@ export default function ProductDetails( props ) {
   }
 
   const handleAddToCart = () => {
-    // Add to cart functionality
     Swal.fire({
       title: 'Added to Cart!',
       text: `${quantity} ${product.productName} added to your cart`,
@@ -80,14 +82,138 @@ export default function ProductDetails( props ) {
   }
 
   const handleBuyNow = () => {
-    // Buy now functionality
-    Swal.fire({
-      title: 'Proceeding to Checkout',
-      text: `You're buying ${quantity} ${product.productName}`,
-      icon: 'info',
-      confirmButtonText: 'Continue'
-    })
+    if (!session) {
+      Swal.fire({
+        title: 'Login Required',
+        text: 'Please login to proceed with payment',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Login',
+        cancelButtonText: 'Cancel'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          router.push('/login?redirect=' + window.location.pathname);
+        }
+      });
+      return;
+    }
+    setShowPaymentModal(true);
   }
+
+const processPayment = async () => {
+  if (!selectedPaymentMethod) {
+    Swal.fire('Error', 'Please select a payment method', 'error');
+    return;
+  }
+
+  setProcessingPayment(true);
+
+  try {
+    const totalAmount = (product.todayPrice || product.price) * quantity;
+    
+    console.log('🔄 Processing payment for product:', product._id, 'Quantity:', quantity);
+
+    // 1. Calculate new values
+    const currentStock = parseInt(product.stockQuantity) || 0;
+    const currentTotalSold = parseInt(product['totalSold '] || product.totalSold || 0);
+    
+    const newStockQuantity = currentStock - quantity;
+    const newTotalSold = currentTotalSold + quantity;
+
+    // 2. Update stock and sales in the database
+    console.log('📈 Updating stock and sales...');
+    
+    const updateResponse = await fetch(`/api/items/${product._id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        stockQuantity: newStockQuantity.toString(), // Convert to string if your DB expects strings
+        totalSold: newTotalSold.toString() ,
+        'status':'processing',
+      }),
+    });
+
+    const updateResult = await updateResponse.json();
+    console.log('📊 Update API Response:', updateResult);
+
+    if (updateResult.success) {
+      console.log('✅ Stock and sales updated successfully');
+      console.log('📦 Modified count:', updateResult.modifiedCount);
+      
+      // Show success message
+      await Swal.fire({
+        title: 'Payment Successful!',
+        text: `Your order has been placed and inventory updated!`,
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: false
+      });
+
+    } else {
+      console.error('❌ Failed to update stock and sales:', updateResult.error);
+      // Still show success but with warning
+      await Swal.fire({
+        title: 'Payment Processed!',
+        text: `Payment completed, but inventory update had issues.`,
+        icon: 'warning',
+        timer: 2000,
+        showConfirmButton: false
+      });
+    }
+
+    // 3. Create success URL and redirect
+    const successUrl = `${window.location.origin}/products/success?method=${selectedPaymentMethod}&product=${encodeURIComponent(product.productName)}&quantity=${quantity}&amount=${totalAmount}&transaction_id=${Date.now()}`;
+    
+    console.log('🔀 Redirecting to:', successUrl);
+    setShowPaymentModal(false);
+    
+    // Redirect to success page
+    window.location.href = successUrl;
+
+  } catch (error) {
+    console.error('💥 Payment process error:', error);
+    Swal.fire({
+      title: 'Payment Failed',
+      text: 'There was an error processing your payment. Please try again.',
+      icon: 'error',
+      confirmButtonText: 'OK'
+    });
+  } finally {
+    setProcessingPayment(false);
+  }
+}
+  const paymentMethods = [
+    {
+      id: 'stripe',
+      name: 'Credit/Debit Card',
+      description: 'Pay with Visa, MasterCard, or American Express',
+      icon: CreditCard,
+      color: 'text-blue-600'
+    },
+    {
+      id: 'sslcommerz',
+      name: 'Local Bank Transfer',
+      description: 'Pay through local Bangladeshi banks',
+      icon: Building,
+      color: 'text-green-600'
+    },
+    {
+      id: 'bkash',
+      name: 'bKash',
+      description: 'Pay using bKash mobile payment',
+      icon: Smartphone,
+      color: 'text-pink-600'
+    },
+    {
+      id: 'nogod',
+      name: 'Nagad',
+      description: 'Pay using Nagad mobile payment',
+      icon: Wallet,
+      color: 'text-purple-600'
+    }
+  ];
 
   if (loading) return (
     <div className="min-h-screen flex justify-center items-center">
@@ -122,6 +248,7 @@ export default function ProductDetails( props ) {
   const mainImage = product.imageUrl || "https://via.placeholder.com/500";
   const imageArray = [mainImage, ...(product.additionalImages || [])];
   const todayPrice = product.todayPrice || product.price;
+  const totalPrice = todayPrice * quantity;
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -148,16 +275,14 @@ export default function ProductDetails( props ) {
           {/* Product Images */}
           <div className="space-y-4">
             <div className="relative">
- 
-
-           <Image
-         src={product?.imageUrl || '/placeholder.jpg'}
-        alt={product?.productName || 'Product Image'}
-          width={350}
-          height={700}
-          unoptimized
-          className="w-full h-100 rounded-xl transition-transform duration-300 group-hover:scale-105"
-        />
+              <Image
+                src={product?.imageUrl || '/placeholder.jpg'}
+                alt={product?.productName || 'Product Image'}
+                width={350}
+                height={700}
+                unoptimized
+                className="w-full h-100 rounded-xl transition-transform duration-300 group-hover:scale-105"
+              />
               {/* Badges */}
               <div className="absolute top-3 left-3 flex flex-col space-y-2">
                 {discountPercent > 0 && (
@@ -186,23 +311,6 @@ export default function ProductDetails( props ) {
                 <Heart className="text-red-500" />
               </button>
             </div>
-            
-            {/* Thumbnail Gallery */}
-            {/* {imageArray.length > 1 && (
-              <div className="flex space-x-2 overflow-x-auto py-2">
-                {imageArray.map((img, index) => (
-                  <Image
-                
-                    src={img}
-                    alt={`${product.productName} view ${index + 1}`}
-              className={`w-16 h-16 object-cover rounded cursor-pointer border-2 ${selectedImage === index ? 'border-primary' : 'border-gray-200'}`}
-                    onClick={() => setSelectedImage(index)}
-                  />
-                ))}
-              </div>
-            )} */}
-
-
           </div>
 
           {/* Product Details */}
@@ -294,14 +402,14 @@ export default function ProductDetails( props ) {
               </div>
             </div>
 
-            {/* Quantity and Add to Cart */}
+            {/* Quantity and Action Buttons */}
             {product.stockQuantity > 0 && (
               <div className="space-y-4">
                 <div className="flex items-center space-x-4">
                   <span className="font-semibold">Quantity:</span>
                   <div className="flex items-center border rounded-lg">
                     <button 
-                      className="px-3 py-2 text-lg"
+                      className="px-3 py-2 text-lg hover:bg-gray-100"
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
                       disabled={quantity <= 1}
                     >
@@ -309,7 +417,7 @@ export default function ProductDetails( props ) {
                     </button>
                     <span className="px-4 py-2 border-x">{quantity}</span>
                     <button 
-                      className="px-3 py-2 text-lg"
+                      className="px-3 py-2 text-lg hover:bg-gray-100"
                       onClick={() => setQuantity(Math.min(product.stockQuantity, quantity + 1))}
                       disabled={quantity >= product.stockQuantity}
                     >
@@ -321,16 +429,16 @@ export default function ProductDetails( props ) {
 
                 <div className="flex space-x-3">
                   <button 
-                    className="btn btn-primary flex-1"
+                    className="btn btn-outline flex-1"
                     onClick={handleAddToCart}
                   >
                     Add to Cart
                   </button>
                   <button 
-                    className="btn btn-secondary flex-1"
+                    className="btn btn-primary flex-1"
                     onClick={handleBuyNow}
                   >
-                    Buy Now
+                    Buy Now - ${totalPrice.toFixed(2)}
                   </button>
                 </div>
               </div>
@@ -379,53 +487,108 @@ export default function ProductDetails( props ) {
           </div>
         </div>
 
-        {/* Related Products (placeholder) */}
+        {/* Payment Modal */}
+        {showPaymentModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl max-w-md w-full p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-bold">Select Payment Method</h3>
+                <button 
+                  onClick={() => setShowPaymentModal(false)}
+                  className="btn btn-ghost btn-sm"
+                >
+                  ✕
+                </button>
+              </div>
+              
+              <div className="space-y-3 mb-6">
+                {paymentMethods.map((method) => (
+                  <div
+                    key={method.id}
+                    className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                      selectedPaymentMethod === method.id
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                    onClick={() => setSelectedPaymentMethod(method.id)}
+                  >
+                    <div className="flex items-center">
+                      <method.icon className={`mr-3 ${method.color}`} size={24} />
+                      <div>
+                        <div className="font-semibold">{method.name}</div>
+                        <div className="text-sm text-gray-600">{method.description}</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                <div className="flex justify-between text-sm">
+                  <span>Product:</span>
+                  <span>{product.productName} × {quantity}</span>
+                </div>
+                <div className="flex justify-between font-semibold mt-2">
+                  <span>Total Amount:</span>
+                  <span>${totalPrice.toFixed(2)}</span>
+                </div>
+              </div>
+
+              <button
+                onClick={processPayment}
+                disabled={!selectedPaymentMethod || processingPayment}
+                className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 disabled:bg-blue-400 transition flex items-center justify-center gap-2 font-medium"
+              >
+                {processingPayment ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    Processing...
+                  </>
+                ) : (
+                  `Pay $${totalPrice.toFixed(2)}`
+                )}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Related Products */}
         <div className="mt-8">
           <h2 className="text-2xl font-bold mb-4">You Might Also Like</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {/* Placeholder for related products */}
-  {products.map((item) => (
-  <div key={item._id || item.sku} className="card bg-base-100 shadow rounded-lg overflow-hidden">
-    <figure className="h-40 w-full relative bg-gray-200">
-
-
-<Link href={'/products'}>
-        <Image
-         src={item?.imageUrl || '/placeholder.jpg'}
-        alt={item?.productName || 'Product Image'}
-          width={300}
-          height={200}
-          unoptimized
-          className="h-60 w-full object-cover transition-transform duration-300 group-hover:scale-105"
-        />
-</Link>
-
-
-
-
-    </figure>
-    <div className="card-body p-4">
-      <h2 className="text-lg font-bold text-gray-800 line-clamp-1">
-        {item?.productName || 'No Name'}
-      </h2>
-      {item?.brand && <p className="text-sm text-gray-500">{item.brand}</p>}
-      {item?.category && <p className="text-sm text-gray-400">{item.category}</p>}
-      <div className="mt-2 flex items-center justify-between">
-        <span className="font-semibold text-green-600">
-          ${item?.todayPrice || item?.price || '0.00'}
-        </span>
-        {item?.regularPrice > (item?.todayPrice || item?.price) && (
-          <span className="text-sm text-gray-400 line-through">
-            ${item?.regularPrice}
-          </span>
-        )}
-      </div>
-    </div>
-  </div>
-))}
-
-
-
+            {products.map((item) => (
+              <div key={item._id || item.sku} className="card bg-base-100 shadow rounded-lg overflow-hidden">
+                <figure className="h-40 w-full relative bg-gray-200">
+                  <Link href={`/products/${item._id}`}>
+                    <Image
+                      src={item?.imageUrl || '/placeholder.jpg'}
+                      alt={item?.productName || 'Product Image'}
+                      width={300}
+                      height={200}
+                      unoptimized
+                      className="h-60 w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                  </Link>
+                </figure>
+                <div className="card-body p-4">
+                  <h2 className="text-lg font-bold text-gray-800 line-clamp-1">
+                    {item?.productName || 'No Name'}
+                  </h2>
+                  {item?.brand && <p className="text-sm text-gray-500">{item.brand}</p>}
+                  {item?.category && <p className="text-sm text-gray-400">{item.category}</p>}
+                  <div className="mt-2 flex items-center justify-between">
+                    <span className="font-semibold text-green-600">
+                      ${item?.todayPrice || item?.price || '0.00'}
+                    </span>
+                    {item?.regularPrice > (item?.todayPrice || item?.price) && (
+                      <span className="text-sm text-gray-400 line-through">
+                        ${item?.regularPrice}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>

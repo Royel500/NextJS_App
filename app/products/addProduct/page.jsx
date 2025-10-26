@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
 import Swal from 'sweetalert2'
+import { useSession } from 'next-auth/react';
 
 export default function AddProducts() {
   const router = useRouter();
@@ -11,7 +12,16 @@ export default function AddProducts() {
   const [imagePreview, setImagePreview] = useState(null);
   const [useFallback, setUseFallback] = useState(false);
 
+  const { data: session, status } = useSession();
+  const emaill = session?.user?.email;
+  // const name = session?.user?.name;
+  // const role = session?.user?.role;
+  // const userId = session?.user?.id;
+
+
+
   const [formData, setFormData] = useState({
+    businessEmail : emaill,
     productName: '',
     productDescription: '',
     price: '',
@@ -23,6 +33,7 @@ export default function AddProducts() {
     todayPrice: '',
     discountValue: '',
     discountType: 'percentage',
+     totalSold: 0,
     sku: '',
     weight: '',
     dimensions: '',
@@ -146,6 +157,7 @@ const handleSubmit = async (e) => {
 
   const handleReset = () => {
     setFormData({
+      businessEmail : emaill,
       productName: '',
       productDescription: '',
       price: '',
@@ -157,6 +169,7 @@ const handleSubmit = async (e) => {
       todayPrice: '',
       discountValue: '',
       discountType: 'percentage',
+       totalSold: 0,
       sku: '',
       weight: '',
       dimensions: '',

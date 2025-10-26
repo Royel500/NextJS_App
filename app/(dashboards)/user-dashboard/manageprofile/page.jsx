@@ -174,12 +174,7 @@ export default function ProfilePage() {
                   </span>
                 </div>
                 
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600 dark:text-gray-300 text-sm">Last Updated</span>
-                  <span className="text-gray-800 dark:text-white text-sm font-medium">
-                    {new Date(userData.updatedAt || userData.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
+              
 
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600 dark:text-gray-300 text-sm">Email Verified</span>

@@ -101,7 +101,6 @@ export async function POST(request) {
       
       // Timestamps
       createdAt: new Date(),
-      updatedAt: new Date(),
       
       // Additional fields
       status: 'active',

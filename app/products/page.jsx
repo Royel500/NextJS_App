@@ -242,7 +242,7 @@ const isNewProduct = (createdAt) => {
                   </div>
                   
                   {item.brand && (
-                    <p className="text-sm text-gray-500">Brand: {item.brand}</p>
+                    <p className="text-sm font-bold text-gray-500">Brand: {item.brand}</p>
                   )}
                   
                   <p className="line-clamp-2 text-gray-600">{item.productDescription}</p>
@@ -268,12 +268,19 @@ const isNewProduct = (createdAt) => {
 
 
                     </div>
-                    
-                    {item.stockQuantity > 0 && (
-                      <p className="text-sm text-gray-500 mt-1">
+                    <div className='flex justify-between'>
+<p>
+         {item.stockQuantity > 0 && (
+                      <h5 className="text-sm text-gray-500 mt-1">
                         In stock: {item.stockQuantity}
-                      </p>
+                      </h5>
                     )}
+</p>
+<p>
+  Total Sold :{item.totalSold || 0}
+</p>
+                    </div>
+             
                   </div>
                   
                   <div className="mt-2 flex flex-wrap gap-2">
