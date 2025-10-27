@@ -5,6 +5,8 @@ import RegisterButton from './RegisterButton'
 import { useSession } from 'next-auth/react'
 import LogOutButton from './LogOutButton'
 import LoginButton from './LoginButton'
+import { ShoppingCart } from 'lucide-react';
+
 // nothing to add
 const Navbar = () => {
     const { data: session, status } = useSession();
@@ -63,10 +65,17 @@ const Navbar = () => {
             </li>
           <li><Link href="/contract">Contact</Link></li>
         </ul>
-      </div>
+
+      </div >
 
       {/* Auth Buttons */}
-     <div className="navbar-end gap-2">
+     <div className="navbar-end gap-3 flex">
+              <li>
+          <Link href="/products/cart"><ShoppingCart size={24} /></Link>
+        </li>
+        <div>
+
+ 
   {session?.user ? (
     <LogOutButton />
   ) : (
@@ -80,6 +89,7 @@ const Navbar = () => {
       <RegisterButton />
     </>
   )}
+         </div>
 </div>
 
     </div>

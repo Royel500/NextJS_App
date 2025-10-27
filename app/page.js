@@ -4,10 +4,15 @@ import CountdownSection from "./Components/CountDown";
 import Image from 'next/image'
 import { useEffect, useState } from "react";
 import CountdownForHome from "./Components/CountdownFroHome";
+import { addToCart } from "./api/utils/cartUtils";
+import Swal from "sweetalert2";
+import { useRouter } from 'next/navigation'
 
 export default function Home() {
  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+    const router = useRouter()
+  
     const fetchProducts = async () => {
     try {
       setLoading(true);
@@ -27,13 +32,32 @@ export default function Home() {
     fetchProducts();
   }, []);
 
+console.log(products.productName)
+
+const handleAddToCart = (item) => {
+  addToCart(item);
+
+  Swal.fire({
+    title: 'Added to Cart!',
+    text: `${item.productName || 'Product'} added to your cart`,
+    icon: 'success',
+    confirmButtonText: 'Go to Cart',
+    showCancelButton: true,
+    cancelButtonText: 'Continue Shopping'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      router.push('/products/cart');
+    }
+  });
+};
+
 
   return (
     <section className="min-h-screen">
       {/* Hero Section */}
       <div
-  className="relative bg-cover bg-center text-white py-32"
-  style={{ backgroundImage: "url('/imgwayer.webp')" }}
+  className="relative bg-cover bg-center text-purple-700 opacity-40 py-32"
+  style={{ backgroundImage: "url('https://i.postimg.cc/QdKptw32/image.png')" }}
 >
   <div className=" mx-auto px-4 text-center">
     <h1 className="text-5xl md:text-6xl font-bold mb-6">Discover Amazing Products</h1>
@@ -41,7 +65,7 @@ export default function Home() {
       Find everything you need with our curated collection of premium products at unbeatable prices.
     </p>
     <Link href={'/products'}>
-        <button className="bg-white text-blue-600 font-bold py-3 px-8 
+        <button className="bg-green-600 text-white font-bold py-3 px-8 
     rounded-full text-lg hover:bg-gray-100 transition duration-300">
       Shop Now
     </button>
@@ -91,11 +115,13 @@ export default function Home() {
 
 {/* Featured Products */}
 <div className="py-16">
-  <div className=" mx-10 px-4">
+  <div className="mx-10 px-4">
     <h2 className="text-3xl font-bold text-center mb-12">Featured Products</h2>
-    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-8">
+
+    {/* ← Scroll container wraps ALL cards */}
+    <div className="flex overflow-x-auto pb-4 space-x-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
       {(() => {
-        // Better shuffle function
+        // Better shuffle function (runs once per render)
         const shuffleArray = (array) => {
           const newArray = [...array];
           for (let i = newArray.length - 1; i > 0; i--) {
@@ -104,35 +130,49 @@ export default function Home() {
           }
           return newArray;
         };
-        
+
         const featuredProducts = shuffleArray(products.slice(0, 10));
-        
+
         return featuredProducts.map((item, index) => (
-          <div key={item._id || item.sku || index} className="bg-white rounded-lg shadow-md overflow-hidden">
-            <div className="h-48 bg-gray-200 relative flex items-center justify-center">
+          /* Each card is fixed width and won't shrink, so cards stay side-by-side */
+          <div
+            key={item._id || item.sku || index}
+            className="bg-white rounded-lg shadow-md overflow-hidden flex-shrink-0 w-72"
+          >
+            <div className="relative h-44">
               <Image
                 src={item?.imageUrl || "https://i.ibb.co/CKTpFTK5/images-2.jpg"}
-                alt={item?.productName}
-                width={300}
+                alt={item?.productName || `Product ${index + 1}`}
+                width={288} // matches w-72 (288px)
                 height={180}
                 unoptimized
-                className="h-50 w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
               />
             </div>
 
             <div className="p-4">
-              <h3 className="text-lg font-semibold">Premium Product {item?.brand}</h3>
+              <h3 className="text-lg font-semibold line-clamp-2 min-h-[3.5rem]">
+                {item?.productName || `Premium Product ${item?.brand || ''}`}
+              </h3>
+
+              {item?.brand && (
+                <p className="text-sm text-gray-500 mt-1">{item.brand}</p>
+              )}
+
               <div className="flex items-center mt-2">
-                <div className="flex text-yellow-400">
-                  {"★".repeat(5)}
-                </div>
+                <div className="flex text-yellow-400">{"★".repeat(5)}</div>
                 <span className="text-gray-600 ml-2">(42)</span>
               </div>
-              <div className="mt-3 flex items-center justify-between">
-                <span className="text-xl font-bold">${ item?.price || item?.regularPrice || item?.todayPrice}</span>
 
-                <button className="bg-blue-600 text-white py-2 px-4 rounded-lg 
-                text-sm hover:bg-blue-700 transition">
+              <div className="mt-3 flex items-center justify-between">
+                <span className="text-xl font-bold">
+                  ${item?.price || item?.regularPrice || item?.todayPrice || '0.00'}
+                </span>
+
+                <button
+                  onClick={() => handleAddToCart(item)}
+                  className="bg-blue-600 text-white py-2 px-4 rounded-lg text-sm hover:bg-blue-700 transition"
+                >
                   Add to Cart
                 </button>
               </div>
@@ -141,16 +181,16 @@ export default function Home() {
         ));
       })()}
     </div>
+
     <div className="text-center mt-12">
-      <Link href={'/products'} >
-        <button  className="border-2 border-blue-600 text-blue-600 font-semibold py-3 px-8 rounded-lg hover:bg-blue-600 hover:text-white transition">
+      <Link href={'/products'}>
+        <button className="border-2 border-blue-600 text-blue-600 font-semibold py-3 px-8 rounded-lg hover:bg-blue-600 hover:text-white transition">
           View All Products
         </button>
       </Link>
     </div>
   </div>
 </div>
-
 
       {/* Promotional Banner */}
       <div className="py-16 bg-blue-50">

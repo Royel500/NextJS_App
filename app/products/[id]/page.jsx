@@ -7,6 +7,7 @@ import Swal from 'sweetalert2'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
+import { addToCart } from '@/app/api/utils/cartUtils'
 
 export default function ProductDetails(props) {
   const { id } = React.use(props.params);
@@ -72,14 +73,25 @@ export default function ProductDetails(props) {
     return createdDate > weekAgo;
   }
 
-  const handleAddToCart = () => {
-    Swal.fire({
-      title: 'Added to Cart!',
-      text: `${quantity} ${product.productName} added to your cart`,
-      icon: 'success',
-      confirmButtonText: 'OK'
-    })
-  }
+
+const handleAddToCart = () => {
+  if (!product) return;
+
+  addToCart(product, quantity);
+
+  Swal.fire({
+    title: 'Added to Cart!',
+    text: `${quantity} × ${product.productName} added to your cart`,
+    icon: 'success',
+    confirmButtonText: 'Go to Cart',
+    showCancelButton: true,
+    cancelButtonText: 'Continue Shopping'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      router.push('/products/cart');
+    }
+  });
+};
 
   const handleBuyNow = () => {
     if (!session) {
@@ -184,6 +196,8 @@ const processPayment = async () => {
     setProcessingPayment(false);
   }
 }
+
+
   const paymentMethods = [
     {
       id: 'stripe',
@@ -551,46 +565,52 @@ const processPayment = async () => {
             </div>
           </div>
         )}
-
-        {/* Related Products */}
-        <div className="mt-8">
-          <h2 className="text-2xl font-bold mb-4">You Might Also Like</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {products.map((item) => (
-              <div key={item._id || item.sku} className="card bg-base-100 shadow rounded-lg overflow-hidden">
-                <figure className="h-40 w-full relative bg-gray-200">
-                  <Link href={`/products/${item._id}`}>
-                    <Image
-                      src={item?.imageUrl || '/placeholder.jpg'}
-                      alt={item?.productName || 'Product Image'}
-                      width={300}
-                      height={200}
-                      unoptimized
-                      className="h-60 w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                  </Link>
-                </figure>
-                <div className="card-body p-4">
-                  <h2 className="text-lg font-bold text-gray-800 line-clamp-1">
-                    {item?.productName || 'No Name'}
-                  </h2>
-                  {item?.brand && <p className="text-sm text-gray-500">{item.brand}</p>}
-                  {item?.category && <p className="text-sm text-gray-400">{item.category}</p>}
-                  <div className="mt-2 flex items-center justify-between">
-                    <span className="font-semibold text-green-600">
-                      ${item?.todayPrice || item?.price || '0.00'}
-                    </span>
-                    {item?.regularPrice > (item?.todayPrice || item?.price) && (
-                      <span className="text-sm text-gray-400 line-through">
-                        ${item?.regularPrice}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
+{/* Related Products - Horizontal Scroll */}
+<div className="mt-8">
+  <h2 className="text-2xl font-bold mb-4">You Might Also Like</h2>
+  <div className="relative">
+    <div className="flex overflow-x-auto pb-4 space-x-4 scrollbar-hide">
+      {products.map((item) => (
+        <div 
+          key={item._id || item.sku} 
+          className="card bg-base-100 shadow rounded-lg overflow-hidden flex-shrink-0 w-64" // Fixed width for consistent sizing
+        >
+          <figure className="h-40 w-full relative bg-gray-200">
+            <Link href={`/products/${item._id}`}>
+              <Image
+                src={item?.imageUrl || '/placeholder.jpg'}
+                alt={item?.productName || 'Product Image'}
+                width={256} // Match the card width
+                height={160}
+                unoptimized
+                className="h-40 w-full object-cover transition-transform duration-300 hover:scale-105"
+              />
+            </Link>
+          </figure>
+          <div className="card-body p-4">
+            <h2 className="text-lg font-bold text-gray-800 line-clamp-2 min-h-[3rem]">
+              {item?.productName || 'No Name'}
+            </h2>
+            {item?.brand && (
+              <p className="text-sm text-gray-500 line-clamp-1">{item.brand}</p>
+            )}
+            <div className="mt-2 flex items-center justify-between">
+              <span className="font-semibold text-green-600">
+                ${item?.todayPrice || item?.price || '0.00'}
+              </span>
+              {item?.regularPrice > (item?.todayPrice || item?.price) && (
+                <span className="text-sm text-gray-400 line-through">
+                  ${item?.regularPrice}
+                </span>
+              )}
+            </div>
           </div>
         </div>
+      ))}
+    </div>
+  </div>
+</div>
+
       </div>
     </div>
   )

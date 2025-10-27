@@ -140,14 +140,21 @@ export async function POST(request) {
 
 // app/api/auth/users/route.js (Simple version)
 
-export async function GET() {
+export async function GET(request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const role = searchParams.get('role'); // Optional filter
+    
+    const filter = role ? { role } : {};
+    
     const collection = await dbConnect('userCollection');
     
-    // Get all users without passwords
     const users = await collection.find(
-      {}, 
-      { projection: { password: 0 } }
+      filter, 
+      { 
+        projection: { password: 0 },
+        sort: { createdAt: -1 }
+      }
     ).toArray();
 
     return NextResponse.json({
@@ -160,58 +167,6 @@ export async function GET() {
     console.error('Get users error:', error);
     return NextResponse.json(
       { error: true, message: 'Internal server error' },
-      { status: 500 }
-    );
-  }
-}
-
-export async function PUT(request) {
-  try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
-    const updates = await request.json();
-    const collection = await dbConnect('userCollection');
-
-    // Remove fields that shouldn't be updated
-    const { password, email, role, ...safeUpdates } = updates;
-
-    const result = await collection.findOneAndUpdate(
-      { _id: session.user.id },
-      { 
-        $set: {
-          ...safeUpdates,
-          updatedAt: new Date()
-        }
-      },
-      { 
-        returnDocument: 'after',
-        projection: { password: 0 }
-      }
-    );
-
-    if (!result) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json({
-      success: true,
-      user: result
-    });
-
-  } catch (error) {
-    console.error('Update profile error:', error);
-    return NextResponse.json(
-      { error: "Internal server error" },
       { status: 500 }
     );
   }

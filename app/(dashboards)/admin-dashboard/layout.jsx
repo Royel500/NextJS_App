@@ -13,7 +13,7 @@ export default function DashboardLayout({ children }) {
       <div className="w-64 bg-white shadow-lg p-6 sticky top-0 h-screen">
         <ul className="space-y-4 text-right">
           <li>
-            <Link href="/admin-dashboard/overview" className="text-blue-600 hover:underline">Overview</Link>
+            <Link href="/admin-dashboard" className="text-blue-600 hover:underline">Overview</Link>
           </li>
           <li>
             <Link href="/admin-dashboard/users" className="text-blue-600 hover:underline">All Users</Link>
