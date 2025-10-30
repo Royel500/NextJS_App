@@ -1,9 +1,9 @@
 // app/api/auth/[...nextauth]/route.js
-import dbConnect from "@/app/lib/dbconnect";
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
+import dbConnect from "../../../lib/dbconnect";
 
 export const authOptions = {
   providers: [

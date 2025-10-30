@@ -4,22 +4,28 @@ import CountdownSection from "./Components/CountDown";
 import Image from 'next/image'
 import { useEffect, useState } from "react";
 import CountdownForHome from "./Components/CountdownFroHome";
-import { addToCart } from "./api/utils/cartUtils";
+// update path if you moved the utils; keep the one that works in your project
 import Swal from "sweetalert2";
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
+import { addToCart } from "./api/utils/route";
 
 export default function Home() {
- const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-    const router = useRouter()
-  
-    const fetchProducts = async () => {
+  const router = useRouter();
+  const { data: session } = useSession();
+
+  // derive a stable userKey for the current user (or undefined for guest)
+  const userKey = session?.user?.email || session?.user?.id || undefined;
+
+  const fetchProducts = async () => {
     try {
       setLoading(true);
       const res = await fetch('/api/items', { cache: 'no-store' });
       if (!res.ok) throw new Error('Failed to fetch products');
       const data = await res.json();
-      setProducts(data);
+      setProducts(data || []);
     } catch (err) {
       console.error('Error fetching products:', err);
       Swal.fire('Error', 'Failed to load products.', 'error');
@@ -32,25 +38,23 @@ export default function Home() {
     fetchProducts();
   }, []);
 
-console.log(products.productName)
+  const handleAddToCart = (item) => {
+    // pass userKey so cart is scoped to the current user/guest
+    addToCart(item, 1, userKey);
 
-const handleAddToCart = (item) => {
-  addToCart(item);
-
-  Swal.fire({
-    title: 'Added to Cart!',
-    text: `${item.productName || 'Product'} added to your cart`,
-    icon: 'success',
-    confirmButtonText: 'Go to Cart',
-    showCancelButton: true,
-    cancelButtonText: 'Continue Shopping'
-  }).then((result) => {
-    if (result.isConfirmed) {
-      router.push('/products/cart');
-    }
-  });
-};
-
+    Swal.fire({
+      title: 'Added to Cart!',
+      text: `${item.productName || 'Product'} added to your cart`,
+      icon: 'success',
+      confirmButtonText: 'Go to Cart',
+      showCancelButton: true,
+      cancelButtonText: 'Continue Shopping'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        router.push('/products/cart');
+      }
+    });
+  };
 
   return (
     <section className="min-h-screen">

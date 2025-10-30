@@ -20,7 +20,7 @@ export async function POST(req) {
 // GET: Read all items
 export async function GET() {
   const collection = await dbConnect('nextJs');
-  const items = await collection.find({}).toArray();
+  const items = await collection.find({}).sort({ createdAt: -1 }).toArray();
   return Response.json(items);
 }
 

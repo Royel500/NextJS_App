@@ -7,7 +7,7 @@ import Swal from 'sweetalert2'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
-import { addToCart } from '@/app/api/utils/cartUtils'
+import { addToCart } from '@/app/api/utils/route'
 
 export default function ProductDetails(props) {
   const { id } = React.use(props.params);
@@ -77,7 +77,10 @@ export default function ProductDetails(props) {
 const handleAddToCart = () => {
   if (!product) return;
 
-  addToCart(product, quantity);
+  // prefer session.user.id or email if available
+  const userKey = session?.user?.email || session?.user?.id || undefined;
+
+  addToCart(product, quantity, userKey);
 
   Swal.fire({
     title: 'Added to Cart!',

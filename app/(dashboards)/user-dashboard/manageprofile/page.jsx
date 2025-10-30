@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Swal from 'sweetalert2';
+import { MdVerified } from "react-icons/md";
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
@@ -45,6 +46,7 @@ export default function ProfilePage() {
       setLoading(false);
     }
   };
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -141,13 +143,16 @@ export default function ProfilePage() {
                   <img
                     src={userData.photoURL || `/api/placeholder/128/128`}
                     alt="Profile"
-                    className="w-32 h-32 rounded-full object-cover border-4 border-blue-100 dark:border-blue-900 mx-auto"
+                    className="w-32 h-32 rounded-full object-cover border-4 border-blue-100
+                     dark:border-blue-900 mx-auto"
                   />
                   {editing && (
                     <button className="absolute bottom-2 right-2 bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 transition shadow-lg">
                       <i className="fas fa-camera text-sm"></i>
                     </button>
                   )}
+
+                  <div className='absolute left-23 top-28'><MdVerified  className="w-7 h-7 fill-current text-green-600" /></div>
                 </div>
                 <h2 className="text-xl font-semibold text-gray-800 dark:text-white mt-4">
                   {userData.name}
@@ -177,7 +182,16 @@ export default function ProfilePage() {
               
 
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600 dark:text-gray-300 text-sm">Email Verified</span>
+                  <div className="text-gray-600 whitespace-nowrap dark:text-gray-300 text-sm">Email <span
+  className={` font-bold ${
+    userData.emailVerified
+      ? 'text-green-600 dark:text-green-400'
+      : 'text-orange-600 dark:text-orange-400'
+  }`}
+>
+  {userData.emailVerified ? 'Verified' : 'Unverified'}
+</span>
+</div>
                   <span className="text-green-600 dark:text-green-400 text-sm">
                     <i className="fas fa-check-circle"></i>
                   </span>
@@ -271,9 +285,18 @@ export default function ProfilePage() {
                     </label>
                     <div className="flex items-center justify-between">
                       <p className="text-gray-800 dark:text-white font-semibold text-lg">{userData.email}</p>
-                      <span className="text-green-600 dark:text-green-400 text-sm bg-green-100 dark:bg-green-900 px-2 py-1 rounded-full">
-                        <i className="fas fa-check-circle mr-1"></i>
-                        Verified
+                      <span className="text-green-600 bg-amber-100 rounded-2xl dark:text-green-400 text-sm
+                       dark:bg-green-900 px-2 ">
+                        <i className="fas fa-check-circle "></i>
+                                        <p
+  className={`text-xs mx-1 p-1 font-bold ${
+    userData.emailVerified
+      ? 'text-green-600 dark:text-green-400'
+      : 'text-orange-600 dark:text-orange-400'
+  }`}
+>
+  {userData.emailVerified ? 'Verified' : 'Unverified'}
+</p>
                       </span>
                     </div>
                   </div>
@@ -298,9 +321,18 @@ export default function ProfilePage() {
                           {userData.phone || 'Not provided'}
                         </p>
                         {userData.phone && (
-                          <span className="text-orange-600 dark:text-orange-400 text-sm bg-orange-100 dark:bg-orange-900 px-2 py-1 rounded-full">
-                            <i className="fas fa-clock mr-1"></i>
-                            Unverified
+                          <span className="text-orange-600 bg-amber-100 dark:text-orange-400
+                           text-sm  dark:bg-orange-900 px-2 rounded-2xl">
+                            <i className="fas fa-clock "></i>
+                <p
+  className={`text-xs font-bold ${
+    userData.phoneVerified
+      ? 'text-green-600 dark:text-green-400'
+      : 'text-orange-600 dark:text-orange-400'
+  }`}
+>
+  {userData.phoneVerified ? 'Verified' : 'Unverified'}
+</p>
                           </span>
                         )}
                       </div>
@@ -482,7 +514,16 @@ export default function ProfilePage() {
                       <i className="fas fa-check-circle"></i>
                     </div>
                     <p className="text-sm text-gray-600 dark:text-gray-300">Email Status</p>
-                    <p className="text-lg font-bold text-green-600 dark:text-green-400">Verified</p>
+                <p
+  className={`text-lg font-bold ${
+    userData.emailVerified
+      ? 'text-green-600 dark:text-green-400'
+      : 'text-orange-600 dark:text-orange-400'
+  }`}
+>
+  {userData.emailVerified ? 'Verified' : 'Unverified'}
+</p>
+
                   </div>
 
                   <div className="bg-orange-50 dark:bg-orange-900 rounded-lg p-4 text-center">
@@ -490,9 +531,16 @@ export default function ProfilePage() {
                       <i className="fas fa-mobile-alt"></i>
                     </div>
                     <p className="text-sm text-gray-600 dark:text-gray-300">Phone Status</p>
-                    <p className={`text-lg font-bold ${userData.phone ? 'text-orange-600 dark:text-orange-400' : 'text-gray-600 dark:text-gray-400'}`}>
-                      {userData.phone ? 'Unverified' : 'Not Set'}
-                    </p>
+                <p
+  className={`text-lg font-bold ${
+    userData.phoneVerified
+      ? 'text-green-600 dark:text-green-400'
+      : 'text-orange-600 dark:text-orange-400'
+  }`}
+>
+  {userData.phoneVerified ? 'Verified' : 'Unverified'}
+</p>
+
                   </div>
 
                   <div className="bg-purple-50 dark:bg-purple-900 rounded-lg p-4 text-center">

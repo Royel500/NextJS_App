@@ -68,7 +68,7 @@ const handleOrder = async () => {
 
   return (
     <button onClick={handleOrder} className="mt-4 btn btn-primary">
-      Order Now
+      Hire Now
     </button>
   )
 }
