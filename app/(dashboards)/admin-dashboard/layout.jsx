@@ -50,6 +50,11 @@ export default function DashboardLayout({ children }) {
             </Link>
           </li>
           <li>
+            <Link href="/admin-dashboard/employee" className="text-blue-600 hover:underline">
+              All Employee
+            </Link>
+          </li>
+          <li>
             <Link href="/admin-dashboard/manageprofile" className="text-blue-600 hover:underline">
               Manage Profile
             </Link>

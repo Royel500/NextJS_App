@@ -28,20 +28,27 @@ const services = [
   const singleData = services.find((data) => data?.id ===(params?.id))
 
   return (
-    <div className="lg:flex py-5 items-center justify-center min-h-screen bg-gray-100 lg:p-8">
-      <div className="lg:flex bg-white rounded-lg shadow-lg max-w-4xl w-full">
-        <div className="lg:w-1/2 p-8 text-left">
+    <div className="lg:flex m-2 py-5 items-center justify-center 
+     bg-gray-100 lg:py-10 min-h-screen">
+
+      <div className="lg:flex lg:py-12 bg-white rounded-lg shadow-lg 
+      max-w-4xl w-full">
+
+        <div className="lg:w- p-8 text-left">
           <p className="text-2xl font-semibold mb-4">{singleData?.name}</p>
           <p className="mb-6 text-gray-700 leading-relaxed">{singleData?.description}</p>
           <p className="font-medium text-gray-500">ID: <span className="text-black">{singleData?.id}</span></p>
           <OrderButton service={singleData} />
         </div>
         <div className="lg:w-1/2">
-          <Image src={singleData?.img} 
-          width={60}
-          height={50}
-          alt={singleData?.name}
-          className="h-full w-full object-cover rounded-r-lg"/>
+         <Image
+  src={singleData?.img}
+  width={400}      // desired container width
+  height={400}     // desired container height
+  alt={singleData?.name}
+  className="rounded-lg p-2 object-contain"
+/>
+
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 
 'use client'
+import Link from 'next/link';
 import { useState, useEffect } from 'react';
 
 // Countdown Section Component
@@ -123,9 +124,12 @@ export default function CountdownSection() {
                     </div>
                   </div>
                 </div>
+            <Link href={'/products'}>
                 <button className={`w-full ${product.buttonColor} text-white py-2 rounded-lg font-semibold transition`}>
                   Shop Now
                 </button>
+                </Link>
+         
               </div>
             </div>
           ))}

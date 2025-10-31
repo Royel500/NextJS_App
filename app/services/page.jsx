@@ -44,7 +44,7 @@ export default function ServicesPage() {
             <div className="px-4 py-2 bg-white rounded-md shadow-sm">
               <span className="font-medium text-gray-800">{services.length}</span>
             </div>
-            <Link href="/contact" className="ml-2 inline-block bg-indigo-600 text-white px-4 py-2 rounded-md shadow hover:bg-indigo-700">
+            <Link href="/contract" className="ml-2 inline-block bg-indigo-600 text-white px-4 py-2 rounded-md shadow hover:bg-indigo-700">
               Contact Sales
             </Link>
           </div>

@@ -64,6 +64,7 @@ const Navbar = () => {
               )}
             </li>
           <li><Link href="/contract">Contact</Link></li>
+          <li><Link href="/employee">Join Our Team</Link></li>
         </ul>
 
       </div >

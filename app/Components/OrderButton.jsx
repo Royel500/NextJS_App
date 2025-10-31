@@ -8,6 +8,7 @@ export default function OrderButton({ service }) {
 const handleOrder = async () => {
   const { value: formValues } = await Swal.fire({
     title: 'Confirm Order',
+     width: '25rem',
     html:
       `<input id="swal-name" name="name" type="text" class="swal2-input" placeholder="Your Name">` +
       `<input id="swal-email" name="email" type="email" class="swal2-input" placeholder="Your Email">` +
@@ -67,7 +68,8 @@ const handleOrder = async () => {
 }
 
   return (
-    <button onClick={handleOrder} className="mt-4 btn btn-primary">
+    <button onClick={handleOrder}
+     className="mt-4 btn btn-primary">
       Hire Now
     </button>
   )
