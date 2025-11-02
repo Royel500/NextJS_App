@@ -27,6 +27,7 @@ export default function EmployeeApplications() {
     }
   };
 
+
   const handleStatusUpdate = async (applicationId, status, position) => {
     setUpdatingId(applicationId);
     setActionMessage('');
@@ -243,6 +244,7 @@ const handleDeleteApplication = async (applicationId) => {
                   </th>
                 </tr>
               </thead>
+
               <tbody className="bg-white divide-y divide-gray-200">
                 {applications.map((app) => (
                   <tr key={app._id} className="hover:bg-gray-50">
@@ -327,6 +329,7 @@ const handleDeleteApplication = async (applicationId) => {
                   </tr>
                 ))}
               </tbody>
+
             </table>
           </div>
 
@@ -336,6 +339,7 @@ const handleDeleteApplication = async (applicationId) => {
               <div className="text-gray-500 mt-2">Applications will appear here when candidates apply</div>
             </div>
           )}
+
         </div>
       </div>
     </div>
