@@ -20,6 +20,9 @@ export default function DashboardLayout({ children }) {
             <Link href="/user-dashboard/manageprofile" className="text-blue-600 hover:underline">Manage Profile</Link>
           </li>
           <li>
+            <Link href="/user-dashboard/myservice" className="text-blue-600 hover:underline">Service Status</Link>
+          </li>
+          <li>
             <Link href="/user-dashboard/reports" className="text-blue-600 hover:underline">Reports</Link>
           </li>
           <li>

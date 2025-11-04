@@ -3,8 +3,12 @@
 import React, { useEffect, useState } from 'react'
 import Swal from 'sweetalert2'
 import Link from 'next/link'
+import { useSession } from 'next-auth/react' // <-- added
 
 export default function AdminOrdersPage() {
+  const { data: session } = useSession() // <-- get session
+  const userEmail = session?.user?.email?.toLowerCase?.() || null
+
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
   const [processingId, setProcessingId] = useState(null) // show which order is processing
@@ -39,7 +43,18 @@ export default function AdminOrdersPage() {
       const data = await res.json()
       // normalize every order
       const normalized = (Array.isArray(data) ? data : []).map(normalizeOrder)
-      setOrders(normalized)
+
+      // If we have a logged-in user email, filter by businessEmail === userEmail
+      if (userEmail) {
+        const filtered = normalized.filter((o) => {
+          const be = (o?.businessEmail || o?.businessemail || o?.business_email || '').toString().toLowerCase().trim()
+          return be && be === userEmail
+        })
+        setOrders(filtered)
+      } else {
+        // no logged-in user -> show empty list (or you can show all by using setOrders(normalized))
+        setOrders([])
+      }
     } catch (err) {
       console.error('fetchOrders error', err)
       Swal.fire('Error', 'Failed to load orders', 'error')
@@ -49,8 +64,9 @@ export default function AdminOrdersPage() {
   }
 
   useEffect(() => {
+    // re-fetch when component mounts or when userEmail changes
     fetchOrders()
-  }, [])
+  }, [userEmail])
 
   // Safe WA link builder
   const waLink = (number) => {
@@ -135,7 +151,7 @@ export default function AdminOrdersPage() {
     <div className="min-h-screen p-6 bg-gray-50">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold">Admin — Orders</h1>
+          <h1 className="text-2xl font-bold">My — Orders</h1>
           <div>
             <button onClick={fetchOrders} className="px-3 py-1 bg-blue-600 text-white rounded-md">Refresh</button>
           </div>
@@ -188,24 +204,16 @@ export default function AdminOrdersPage() {
                       <td className="px-4 py-3 text-sm">{created}</td>
 
                       <td className="px-4 py-3 text-right flex gap-2 justify-end">
-        
-
                         <button
-                          onClick={() => handleAction(id, 'delivered')}
+                          onClick={() => handleAction(id, 'confirmed')}
                           disabled={processingId === id}
-                          className="px-3 py-1 rounded bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50"
+                          className="px-3 py-1 rounded bg-green-600 text-white hover:bg-green-700 disabled:opacity-50"
                         >
-                          {processingId === id ? 'Please wait' : 'Delivered'}
+                          {processingId === id ? 'Please wait' : 'Confirm'}
                         </button>
 
-                        <a
-                          href={waLink(order.userNumber)}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="px-3 py-1 rounded bg-blue-500 text-white hover:bg-blue-600"
-                        >
-                          Contact
-                        </a>
+      
+
 
                         <button
                           onClick={() => handleDelete(id)}

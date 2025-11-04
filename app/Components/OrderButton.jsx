@@ -1,8 +1,13 @@
 'use client'
+import { useSession } from 'next-auth/react';
 import React from 'react'
 import Swal from 'sweetalert2'
 
-export default function OrderButton({ s }) {
+export default function  OrderButton({ s }) {
+
+    const { data: session, status } = useSession();
+    const emaill = session?.user?.email;
+    
   const handleOrder = async () => {
     let raw = null
     let employees = []
@@ -110,6 +115,7 @@ export default function OrderButton({ s }) {
         return {
           name,
           email,
+          businessEmail : emaill,
           phone: cleanPhone,
           developerId: selectedDev ? selectedDev.__id : null,
           developerName: selectedDev ? (selectedDev.name || selectedDev.fullName) : null,
@@ -125,6 +131,7 @@ export default function OrderButton({ s }) {
         sId: s._id ?? s.id ?? null,
         sName: s.name ?? '',
         price: s.price ?? 0,
+         businessEmail : emaill,
         userName: formValues.name,
         userEmail: formValues.email,
         userNumber: formValues.phone

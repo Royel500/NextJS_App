@@ -56,6 +56,8 @@ export default function Home() {
     });
   };
 
+
+
   return (
     <section className="min-h-screen">
       {/* Hero Section */}
@@ -82,6 +84,7 @@ export default function Home() {
       {/* Featured Categories */}
       <div className="py-16 bg-gray-50">
         <div className=" mx-10 px-4">
+          <p>Admin Email : <span className="text-green-600 font-bold "> suma@gmail.com   </span>And Password :<span className="text-green-600 font-bold ">123456</span></p>
           <h2 className="text-3xl font-bold text-center mb-12">Shop by Category</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:scale-105">

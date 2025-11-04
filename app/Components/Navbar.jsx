@@ -53,7 +53,7 @@ console.log('Navbar cartCount', cartCount)
           <li>
             {session?.user ? <Link href={dashboardLink}>Dashboard</Link> : <Link href="/login">Dashboard</Link>}
           </li>
-          <li><Link href="/contact">Contact</Link></li>
+          <li><Link href="/contract">Contact</Link></li>
           <li><Link href="/employee">Join Our Team</Link></li>
         </ul>
       </div>
