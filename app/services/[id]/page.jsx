@@ -213,7 +213,7 @@ export default function ServiceDetailsPage({ params }) {
                 Get a free consultation and project estimate.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <OrderButton s={s} variant="secondary" />
+                <OrderButton s={s} />
                 <button className="px-8 py-3 border-2 border-white text-white rounded-lg font-medium hover:bg-white hover:text-blue-600 transition-colors">
                   Schedule Consultation
                 </button>

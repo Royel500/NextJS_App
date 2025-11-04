@@ -17,12 +17,15 @@ export default function ServicesPage() {
               End-to-end digital services to help you build, grow and scale — hand-crafted by experienced engineers, designers and strategists.
             </p>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="text-sm text-gray-500">Total Services</div>
-            <div className="bg-white px-3 py-1 rounded-md border">
-              <span className="font-medium text-gray-900">{services.length}</span>
+          <div className="flex justify-end gap-4">
+            <div className="text-sm whitespace-nowrap mt-2 text-gray-500">Total Services :</div>
+            <div className="bg-white  whitespace-nowrap px-3 py-1 rounded-md border">
+              <span className="font-medium whitespace-nowrap text-gray-900">{services.length}</span>
             </div>
-            <Link href="/contract" className="bg-indigo-600 text-white px-4 py-2 rounded-md shadow hover:bg-indigo-700 transition-colors">
+            <Link href="/contract" className="bg-indigo-600 whitespace-nowrap text-white px-4 py-2 rounded-md shadow
+             hover:bg-indigo-700 transition-colors">
+
+
               Contact Sales
             </Link>
           </div>
@@ -54,15 +57,17 @@ export default function ServicesPage() {
                 </p>
 
                 <div className="mt-4 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
                     <span className="text-lg font-bold text-green-600">${s.price}</span>
-                    <span className="text-xs text-gray-500">starting</span>
+                    <span className="text-xs mx-0.5 text-gray-500">starting</span>
                   </div>
 
-                  <div className="flex gap-2">
+                  <div className="flex gap-1 ">
                     <Link 
                       href={`/services/${s.id}`}
-                      className="inline-flex items-center px-3 py-2 text-sm font-medium text-indigo-600 border border-indigo-200 rounded-md hover:bg-indigo-50 transition-colors"
+                      className="inline-flex items-center mt-4 btn btn-primary
+                       text-sm font-bold border border-indigo-200
+                        transition-colors"
                     >
                       Details
                     </Link>

@@ -1,9 +1,11 @@
+// app/layout.jsx (or RootLayout file you have)
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "./Components/Navbar";
 import Footer from "./Components/Footer";
 import NextAuthProvider from "./Provider/nextAuthProvider";
-// import '../app/Components/index.css'
+import { CartProvider } from "./Provider/CartContext/CartContext";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -23,23 +25,23 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <NextAuthProvider>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <div>
-          <Navbar></Navbar>
+        {/* Put CartProvider here so Navbar and children are inside the same provider */}
+        <CartProvider>
+          <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+            <div>
+              <Navbar />
+            </div>
 
-        </div>
-        <main className="min-h-screen ">
-        {children}
-        </main>
-        <div>
-      <Footer></Footer>
-        </div>
-    
-      </body>
+            <main className="min-h-screen">
+              {children}
+            </main>
+
+            <div>
+              <Footer />
+            </div>
+          </body>
+        </CartProvider>
       </NextAuthProvider>
-
     </html>
   );
 }

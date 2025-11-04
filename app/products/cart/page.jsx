@@ -19,6 +19,7 @@ export default function CartPage() {
 
   useEffect(() => {
     setCart(getCart(userKey));
+   try { window.dispatchEvent(new Event('cartViewed')) } catch (e) {}
   }, [userKey]);
 
   const updateQuantity = (id, newQty) => {

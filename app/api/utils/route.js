@@ -2,7 +2,6 @@
 const GUEST_ID_KEY = 'app_guest_id';
 const CART_KEY_PREFIX = 'app_cart_';
 
-/** Return existing guest id or create a new one (stored in localStorage). */
 function getOrCreateGuestId() {
   if (typeof window === 'undefined') return 'guest';
   try {
@@ -18,13 +17,11 @@ function getOrCreateGuestId() {
   }
 }
 
-/** Build storage key for a given userKey (email/id) or guest id */
 function storageKeyFor(userKey) {
   const key = userKey || getOrCreateGuestId();
   return CART_KEY_PREFIX + key;
 }
 
-/** read cart for userKey (or guest if not passed) */
 export const getCart = (userKey) => {
   if (typeof window === 'undefined') return [];
   try {
@@ -36,49 +33,50 @@ export const getCart = (userKey) => {
   }
 };
 
-/** save cart for userKey */
+/** saveCart: write to localStorage AND dispatch same-tab event */
 export const saveCart = (cart, userKey) => {
   if (typeof window === 'undefined') return;
   try {
     localStorage.setItem(storageKeyFor(userKey), JSON.stringify(cart || []));
+    // notify same-tab listeners
+    try { window.dispatchEvent(new Event('cartUpdated')); } catch (e) {}
   } catch (err) {
     console.error('saveCart error', err);
   }
 };
 
-/** addToCart: same shape as your original but accepts userKey */
-export const addToCart = (product, quantity = 1, userKey) => {
-  if (typeof window === 'undefined') return [];
+/** addToCart uses saveCart so no extra dispatch needed here */
+export function addToCart(product, qty = 1, userKey) {
+  if (typeof window === 'undefined') return;
   try {
-    const cart = getCart(userKey);
-    const existing = cart.find((item) => item._id === product._id);
+    const items = getCart(userKey);
 
-    if (existing) {
-      existing.quantity = (existing.quantity || 0) + quantity;
+    const id = product._id || product.id;
+    const idx = items.findIndex((it) => it._id === id);
+    if (idx > -1) {
+      items[idx].quantity = (parseInt(items[idx].quantity, 10) || 0) + qty;
     } else {
-      cart.push({
-        _id: product._id,
-        productName: product.productName,
-        price: product.todayPrice || product.price,
-        imageUrl: product.imageUrl,
-        quantity,
+      items.push({
+        _id: id,
+        productName: product.productName || product.name,
+        price: product.todayPrice || product.price || 0,
+        quantity: qty,
+        imageUrl: product.imageUrl || product.thumbnail || ''
       });
     }
 
-    saveCart(cart, userKey);
-    return cart;
-  } catch (err) {
-    console.error('addToCart error', err);
-    return [];
+    saveCart(items, userKey);
+    console.log('addToCart wrote', storageKeyFor(userKey), items);
+  } catch (e) {
+    console.error('addToCart error', e);
   }
-};
+}
 
-/** removeFromCart: accepts userKey and returns updated cart */
 export const removeFromCart = (id, userKey) => {
   if (typeof window === 'undefined') return [];
   try {
     const updated = getCart(userKey).filter((item) => item._id !== id);
-    saveCart(updated, userKey);
+    saveCart(updated, userKey); // saveCart now dispatches cartUpdated
     return updated;
   } catch (err) {
     console.error('removeFromCart error', err);
@@ -86,17 +84,17 @@ export const removeFromCart = (id, userKey) => {
   }
 };
 
-/** clearCart: remove current user's cart */
 export const clearCart = (userKey) => {
   if (typeof window === 'undefined') return;
   try {
     localStorage.removeItem(storageKeyFor(userKey));
+    // dispatch so same-tab listeners update
+    try { window.dispatchEvent(new Event('cartUpdated')); } catch (e) {}
   } catch (err) {
     console.error('clearCart error', err);
   }
 };
 
-/** Optional helper: setCart directly for userKey */
 export const setCart = (cart, userKey) => {
   saveCart(cart, userKey);
   return cart;

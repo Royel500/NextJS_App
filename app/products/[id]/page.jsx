@@ -74,27 +74,31 @@ export default function ProductDetails(props) {
   }
 
 
+// ...existing code...
 const handleAddToCart = () => {
   if (!product) return;
 
-  // prefer session.user.id or email if available
   const userKey = session?.user?.email || session?.user?.id || undefined;
+  const qty = Math.max(1, quantity || 1);
 
-  addToCart(product, quantity, userKey);
+  addToCart(product, qty, userKey);
+
+  try { window.dispatchEvent(new Event('cartUpdated')) } catch (e) {}
 
   Swal.fire({
     title: 'Added to Cart!',
-    text: `${quantity} × ${product.productName} added to your cart`,
+    text: `${qty} × ${product.productName} added to your cart`,
     icon: 'success',
     confirmButtonText: 'Go to Cart',
     showCancelButton: true,
     cancelButtonText: 'Continue Shopping'
   }).then((result) => {
-    if (result.isConfirmed) {
-      router.push('/products/cart');
-    }
-  });
-};
+    if (result.isConfirmed) router.push('/products/cart')
+  })
+}
+
+// console.log('addToCart called', key, items)
+// ...existing code...
 
   const handleBuyNow = () => {
     if (!session) {
@@ -107,6 +111,7 @@ const handleAddToCart = () => {
         cancelButtonText: 'Cancel'
       }).then((result) => {
         if (result.isConfirmed) {
+             window.dispatchEvent(new Event('cartUpdated'));
           router.push('/login?redirect=' + window.location.pathname);
         }
       });
