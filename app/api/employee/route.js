@@ -263,8 +263,11 @@ async function sendStatusEmail(userEmail, userName, status, position) {
       text: generateTextEmail(userName, status, position)
     };
 
-    // Use your existing email API
-    const response = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/send-email`, {
+    console.log('Attempting to send email to:', userEmail); // Debug log
+
+    // Use absolute URL to avoid issues
+    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+    const response = await fetch(`${baseUrl}/api/send-email`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -272,59 +275,171 @@ async function sendStatusEmail(userEmail, userName, status, position) {
       body: JSON.stringify(emailData),
     });
 
+    const responseData = await response.json(); // Read the response
+    console.log('Email API response:', response.status, responseData); // Debug log
+
     if (!response.ok) {
-      console.error('Failed to send email');
+      console.error('Failed to send email:', responseData.message);
+      throw new Error(responseData.message || 'Email sending failed');
     } else {
-      console.log('Email sent successfully to:', userEmail);
+      console.log('✅ Email sent successfully to:', userEmail);
     }
 
-    return response.ok;
+    return true;
   } catch (error) {
-    console.error('Email error:', error);
+    console.error('Email error:', error.message);
+    // Don't throw error here - we don't want to block the status update
     return false;
   }
 }
 
 function generateEmailTemplate(name, status, position) {
-  if (status === 'rejected') {
-    return `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
-        <div style="text-align: center; margin-bottom: 20px;">
-          <h2 style="color: #dc2626; margin: 0;">Application Status Update</h2>
+  const header = `
+    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px 20px; text-align: center; color: white;">
+      <div style="max-width: 600px; margin: 0 auto;">
+        <h1 style="margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">
+          ${status === 'rejected' ? 'Royal Invoice' : 'Royal Invoice'}
+        </h1>
+        <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">
+          ${status === 'rejected' ? 'Application Update' : 'Welcome to Our Team!'}
+        </p>
+      </div>
+    </div>
+  `;
+
+  const footer = `
+    <div style="background: #f8f9fa; padding: 25px 20px; text-align: center; border-top: 1px solid #e9ecef;">
+      <div style="max-width: 600px; margin: 0 auto;">
+        <div style="margin-bottom: 15px;">
+          <a href="https://www.instagram.com/royel52888/" style="margin: 0 10px; text-decoration: none;">
+            <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" alt="Instagram" width="24" height="24" style="border-radius: 50%;">
+          </a>
+          <a href="#" style="margin: 0 10px; text-decoration: none;">
+            <img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" alt="Facebook" width="24" height="24" style="border-radius: 50%;">
+          </a>
+          <a href="https://twitter.com/royel528 " style="margin: 0 10px; text-decoration: none;">
+            <img src="https://cdn-icons-png.flaticon.com/512/733/733579.png" alt="Twitter" width="24" height="24" style="border-radius: 50%;">
+          </a>
         </div>
-        <p>Dear <strong>${name}</strong>,</p>
-        <p>Thank you for your interest in joining our team and for taking the time to apply for the <strong>${position}</strong> position.</p>
-        <p>After careful consideration of all applications, we regret to inform you that we have decided to move forward with other candidates whose qualifications more closely match our current needs.</p>
-        <p>We truly appreciate your interest in our company and encourage you to apply for future positions that match your skills and experience.</p>
-        <br>
-        <p>We wish you the best in your job search and future endeavors.</p>
-        <br>
-        <p>Best regards,<br>
-        <strong>HR Team</strong></p>
+        <p style="margin: 0; color: #6c757d; font-size: 14px;">
+          © 2024 Royal Invoice. All rights reserved.<br>
+          <span style="font-size: 12px; color: #adb5bd;">
+            123 Business Avenue, Suite 100, City, State 12345
+          </span>
+        </p>
+      </div>
+    </div>
+  `;
+
+  if (status === 'rejected') {
+    const body = `
+      <div style="padding: 40px 30px; background: white;">
+        <div style="max-width: 500px; margin: 0 auto;">
+          <!-- Status Icon -->
+          <div style="text-align: center; margin-bottom: 30px;">
+            <div style="background: #fee2e2; width: 80px; height: 80px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;">
+              <span style="font-size: 36px; color: #dc2626;">✕</span>
+            </div>
+          </div>
+
+          <!-- Main Content -->
+          <h2 style="color: #1f2937; text-align: center; margin-bottom: 25px; font-size: 24px;">
+            Application Status Update
+          </h2>
+          
+          <p style="color: #6b7280; line-height: 1.6; margin-bottom: 20px;">
+            Dear <strong style="color: #374151;">${name}</strong>,
+          </p>
+          
+          <p style="color: #6b7280; line-height: 1.6; margin-bottom: 20px;">
+            Thank you for your interest in joining <strong>Royal Invoice</strong> and for taking the time to apply for the 
+            <strong style="color: #374151;"> ${position}</strong> position.
+          </p>
+          
+          <div style="background: #fef2f2; border-left: 4px solid #dc2626; padding: 15px; margin: 25px 0;">
+            <p style="color: #7f1d1d; margin: 0; line-height: 1.5;">
+              After careful consideration of all applications, we regret to inform you that we have decided to move forward with other candidates whose qualifications more closely match our current needs.
+            </p>
+          </div>
+          
+          <p style="color: #6b7280; line-height: 1.6; margin-bottom: 20px;">
+            We truly appreciate your interest in our company and encourage you to apply for future positions that match your skills and experience.
+          </p>
+          
+          <p style="color: #6b7280; line-height: 1.6;">
+            We wish you the best in your job search and future endeavors.
+          </p>
+        </div>
+      </div>
+    `;
+
+    return `
+      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+        ${header}
+        ${body}
+        ${footer}
       </div>
     `;
   } else {
-    return `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
-        <div style="text-align: center; margin-bottom: 20px;">
-          <h2 style="color: #16a34a; margin: 0;">🎉 Congratulations!</h2>
+    const body = `
+      <div style="padding: 40px 30px; background: white;">
+        <div style="max-width: 500px; margin: 0 auto;">
+          <!-- Status Icon -->
+          <div style="text-align: center; margin-bottom: 30px;">
+            <div style="background: #dcfce7; width: 80px; height: 80px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;">
+              <span style="font-size: 36px; color: #16a34a;">✓</span>
+            </div>
+          </div>
+
+          <!-- Main Content -->
+          <h2 style="color: #1f2937; text-align: center; margin-bottom: 10px; font-size: 28px; font-weight: 700;">
+            Congratulations! 🎉
+          </h2>
+          <p style="color: #6b7280; text-align: center; margin-bottom: 30px; font-size: 18px;">
+            Welcome to Royal Invoice
+          </p>
+          
+          <p style="color: #6b7280; line-height: 1.6; margin-bottom: 20px;">
+            Dear <strong style="color: #374151;">${name}</strong>,
+          </p>
+          
+          <p style="color: #6b7280; line-height: 1.6; margin-bottom: 20px;">
+            We are thrilled to inform you that your application has been <strong style="color: #16a34a;">approved</strong>!
+          </p>
+          
+          <div style="background: #f0fdf4; border: 2px solid #bbf7d0; border-radius: 8px; padding: 20px; text-align: center; margin: 25px 0;">
+            <p style="margin: 0; color: #15803d; font-size: 20px; font-weight: 600;">
+              You are now officially a<br>
+              <span style="color: #16a34a; font-size: 24px;">${position}</span>
+            </p>
+          </div>
+          
+          <p style="color: #6b7280; line-height: 1.6; margin-bottom: 25px;">
+            Welcome to the Royal Invoice family! We were very impressed with your qualifications and experience, and we believe you will be a valuable addition to our team.
+          </p>
+          
+          <div style="background: #f8fafc; border-radius: 8px; padding: 20px; margin: 25px 0;">
+            <h3 style="color: #374151; margin-bottom: 15px; font-size: 18px;">📋 Next Steps:</h3>
+            <ul style="color: #6b7280; line-height: 1.6; margin: 0; padding-left: 20px;">
+              <li style="margin-bottom: 8px;">Our HR team will contact you within 2-3 business days</li>
+              <li style="margin-bottom: 8px;">They will guide you through the onboarding process</li>
+              <li style="margin-bottom: 8px;">You'll receive details about your start date and initial training</li>
+              <li>Complete your pre-employment documentation</li>
+            </ul>
+          </div>
+          
+          <p style="color: #6b7280; line-height: 1.6; text-align: center; margin-top: 30px;">
+            Once again, congratulations! We look forward to working with you.
+          </p>
         </div>
-        <p>Dear <strong>${name}</strong>,</p>
-        <p>We are thrilled to inform you that your application has been <strong>approved</strong>!</p>
-        <p>You are now officially a <strong style="color: #16a34a;">${position}</strong> in our team.</p>
-        <p>Welcome to the family! We were very impressed with your qualifications and experience, and we believe you will be a valuable addition to our team.</p>
-        <br>
-        <p><strong>Next Steps:</strong></p>
-        <ul>
-          <li>Our HR team will contact you within 2-3 business days</li>
-          <li>They will guide you through the onboarding process</li>
-          <li>You'll receive details about your start date and initial training</li>
-        </ul>
-        <br>
-        <p>Once again, congratulations! We look forward to working with you.</p>
-        <br>
-        <p>Welcome aboard!<br>
-        <strong>HR Team</strong></p>
+      </div>
+    `;
+
+    return `
+      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+        ${header}
+        ${body}
+        ${footer}
       </div>
     `;
   }
@@ -333,9 +448,12 @@ function generateEmailTemplate(name, status, position) {
 function generateTextEmail(name, status, position) {
   if (status === 'rejected') {
     return `
+ROYAL INVOICE - Application Status Update
+===========================================
+
 Dear ${name},
 
-Thank you for your interest in joining our team and for taking the time to apply for the ${position} position.
+Thank you for your interest in joining Royal Invoice and for taking the time to apply for the ${position} position.
 
 After careful consideration of all applications, we regret to inform you that we have decided to move forward with other candidates whose qualifications more closely match our current needs.
 
@@ -345,26 +463,41 @@ We wish you the best in your job search and future endeavors.
 
 Best regards,
 HR Team
+The Royal 
+
+---
+© 2024 The Royal Global Solution. All rights reserved.
+123 Business Avenue, Suite 100, City, State 12345
     `;
   } else {
     return `
+ROYAL INVOICE - Congratulations!
+=================================
+
 Dear ${name},
 
 We are thrilled to inform you that your application has been approved!
 
-You are now officially a ${position} in our team.
+You are now officially a ${position} at Royal Invoice.
 
 Welcome to the family! We were very impressed with your qualifications and experience, and we believe you will be a valuable addition to our team.
 
-Next Steps:
+NEXT STEPS:
 - Our HR team will contact you within 2-3 business days
 - They will guide you through the onboarding process
 - You'll receive details about your start date and initial training
+- Complete your pre-employment documentation
 
 Once again, congratulations! We look forward to working with you.
 
 Welcome aboard!
+
 HR Team
+The Royal 
+
+---
+© 2024 The Royal Global Solution. All rights reserved.
+123 Business Avenue, Suite 100, City, State 12345
     `;
   }
 }
