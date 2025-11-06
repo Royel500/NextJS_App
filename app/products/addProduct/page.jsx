@@ -11,6 +11,7 @@ export default function AddProducts() {
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [useFallback, setUseFallback] = useState(false);
+const [selectedCategoryDropdown, setSelectedCategoryDropdown] = useState('All')
 
   const { data: session, status } = useSession();
   const emaill = session?.user?.email;
@@ -18,6 +19,23 @@ export default function AddProducts() {
   // const role = session?.user?.role;
   // const userId = session?.user?.id;
 
+const categories = [
+  "Electronics",
+  "Fashion",
+  "Home & Kitchen",
+  "Beauty & Personal Care",
+  "Sports & Outdoors",
+  "Toys & Games",
+  "Automotive",
+  "Books & Stationery",
+  "Health & Wellness",
+  "Pet Supplies",
+  "Jewelry & Accessories",
+  "Groceries",
+  "Furniture",
+  "Baby Products",
+  "Tools & Hardware"
+];
 
 
   const [formData, setFormData] = useState({
@@ -75,11 +93,11 @@ const uploadImageToImgBB = async () => {
   form.append('image', imageFile);
 
   try {
-    const apiKey = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
+    const apiKey = process.env.NEXT_PUBLIC_PHOTO_KEY;
 
     if (!apiKey) {
       console.warn('No ImgBB API key found. Using placeholder image.');
-      return 'https://i.ibb.co/NgmXvV1k/david-barros-fm-IXg-QUo-MZg-unsplash.jpg';
+      return 'https://i.postimg.cc/CK4zTp1b/The-Royel-s-Logo-img.jpg';
     }
 
     const res = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
@@ -131,8 +149,10 @@ const handleSubmit = async (e) => {
     if (!imageUrl) {
       imageUrl = 'https://i.ibb.co/NgmXvV1k/david-barros-fm-IXg-QUo-MZg-unsplash.jpg';
     }
-
-    const payload = { ...formData, imageUrl };
+const finalCategory = (selectedCategoryDropdown && selectedCategoryDropdown !== 'All')
+  ? selectedCategoryDropdown
+  : (formData.category || '').trim()
+    const payload = { ...formData, category: finalCategory, imageUrl };
 
     const res = await fetch('/api/items', {
       method: 'POST',
@@ -237,18 +257,58 @@ const handleSubmit = async (e) => {
                   ></textarea>
                 </div>
 
-                <div>
-                  <label className="label font-medium">Category *</label>
-                  <input 
-                    type="text" 
-                    name="category" 
-                    value={formData.category}
-                    onChange={handleInputChange}
-                    className="input input-bordered w-full" 
-                    placeholder="e.g., Electronics, Clothing" 
-                    required 
-                  />
-                </div>
+
+
+  <div>
+  <label className="label font-medium">Category *</label>
+
+  {/* Dropdown — user can pick an existing category */}
+  <select
+    className="select select-bordered w-full mb-2"
+    value={selectedCategoryDropdown}
+    onChange={(e) => {
+      const val = e.target.value
+      setSelectedCategoryDropdown(val)
+
+      // if user picks a dropdown value, clear manual category text to avoid conflict
+      if (val !== 'All') {
+        setFormData(prev => ({ ...prev, category: val }))
+      } else {
+        // if they pick 'All' (meaning no dropdown), keep manual value as is
+        setFormData(prev => ({ ...prev, category: '' }))
+      }
+    }}
+  >
+    {/* keep 'All' or 'Select' as neutral option */}
+    <option value="All">Select category (or type below)</option>
+    {categories.filter(c => c !== 'All').map(cat => (
+      <option key={cat} value={cat}>{cat}</option>
+    ))}
+  </select>
+
+  {/* Manual input — disabled when dropdown is used */}
+  <input
+    type="text"
+    name="category"
+    value={formData.category}
+    onChange={(e) => {
+      const v = e.target.value
+      // manual typing clears dropdown selection (so manual wins)
+      if (v && selectedCategoryDropdown !== 'All') {
+        setSelectedCategoryDropdown('All')
+      }
+      setFormData(prev => ({ ...prev, category: v }))
+    }}
+    className="input input-bordered w-full"
+    placeholder="Type a category (or pick above)"
+    required
+    disabled={selectedCategoryDropdown !== 'All' && !!selectedCategoryDropdown}
+  />
+  <p className="text-xs text-gray-500 mt-1">
+    Choose from the dropdown or type a new category — only one is allowed.
+  </p>
+</div>
+
 
                 <div>
                   <label className="label font-medium">Brand</label>

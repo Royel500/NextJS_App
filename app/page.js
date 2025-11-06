@@ -87,7 +87,8 @@ export default function Home() {
           <p>Admin Email : <span className="text-green-600 font-bold "> suma@gmail.com   </span>And Password :<span className="text-green-600 font-bold ">123456</span></p>
           <h2 className="text-3xl font-bold text-center mb-12">Shop by Category</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:scale-105">
+            <Link href={`/products?category=${encodeURIComponent('Electronics')}`}>
+                       <div className="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:scale-105">
               <div className="h-48 bg-blue-100 flex items-center justify-center">
                 <span className="text-4xl">📱</span>
               </div>
@@ -97,6 +98,10 @@ export default function Home() {
               </div>
             </div>
             
+            </Link>
+
+ <Link href={`/products?category=${encodeURIComponent('Fashion')}`}>
+
             <div className="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:scale-105">
               <div className="h-48 bg-green-100 flex items-center justify-center">
                 <span className="text-4xl">👕</span>
@@ -106,7 +111,10 @@ export default function Home() {
                 <p className="text-gray-600">Trendy clothes and accessories</p>
               </div>
             </div>
-            
+             </Link>
+<Link href={`/products?category=${encodeURIComponent('Home & Kitchen')}`}>
+
+
             <div className="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:scale-105">
               <div className="h-48 bg-yellow-100 flex items-center justify-center">
                 <span className="text-4xl">🏠</span>
@@ -116,6 +124,7 @@ export default function Home() {
                 <p className="text-gray-600">Furniture and decor items</p>
               </div>
             </div>
+            </Link>
           </div>
         </div>
       </div>
@@ -123,12 +132,12 @@ export default function Home() {
 {/* Featured Products */}
 <div className="py-16">
   <div className="mx-10 px-4">
-    <h2 className="text-3xl font-bold text-center mb-12">Featured Products</h2>
+    <h2 className="text-3xl font-bold text-center mb-12">Most Recent Products</h2>
 
-    {/* ← Scroll container wraps ALL cards */}
-    <div className="flex overflow-x-auto pb-4 space-x-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+    {/* Product Grid (5 per row, max 10 rows) */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
       {(() => {
-        // Better shuffle function (runs once per render)
+        // Shuffle and limit to 50 products (5×10 grid)
         const shuffleArray = (array) => {
           const newArray = [...array];
           for (let i = newArray.length - 1; i > 0; i--) {
@@ -138,23 +147,24 @@ export default function Home() {
           return newArray;
         };
 
-        const featuredProducts = shuffleArray(products.slice(0, 10));
+        const featuredProducts = shuffleArray(products.slice(0, 25)); // Max 50 visible
 
         return featuredProducts.map((item, index) => (
-          /* Each card is fixed width and won't shrink, so cards stay side-by-side */
           <div
             key={item._id || item.sku || index}
-            className="bg-white rounded-lg shadow-md overflow-hidden flex-shrink-0 w-72"
+            className="bg-white rounded-lg shadow-md overflow-hidden flex-shrink-0"
           >
             <div className="relative h-44">
+              <Link href={`products/${item._id}`}>
               <Image
                 src={item?.imageUrl || "https://i.ibb.co/CKTpFTK5/images-2.jpg"}
                 alt={item?.productName || `Product ${index + 1}`}
-                width={288} // matches w-72 (288px)
+                width={288}
                 height={180}
                 unoptimized
                 className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
               />
+                </Link>
             </div>
 
             <div className="p-4">
@@ -178,7 +188,8 @@ export default function Home() {
 
                 <button
                   onClick={() => handleAddToCart(item)}
-                  className="bg-blue-600 text-white py-2 px-4 rounded-lg text-sm hover:bg-blue-700 transition"
+                  className="bg-blue-600 text-white whitespace-nowrap py-2 px-2 rounded-lg text-sm
+                   hover:bg-blue-700 transition"
                 >
                   Add to Cart
                 </button>
@@ -189,6 +200,7 @@ export default function Home() {
       })()}
     </div>
 
+    {/* View All Button */}
     <div className="text-center mt-12">
       <Link href={'/products'}>
         <button className="border-2 border-blue-600 text-blue-600 font-semibold py-3 px-8 rounded-lg hover:bg-blue-600 hover:text-white transition">
@@ -198,6 +210,7 @@ export default function Home() {
     </div>
   </div>
 </div>
+
 
       {/* Promotional Banner */}
       <div className="py-16 bg-blue-50">

@@ -3,8 +3,9 @@ import React, { useEffect, useState, useMemo, useRef } from 'react'
 import { Pencil, Trash2, View, Star, Zap, Clock } from 'lucide-react'
 import Swal from 'sweetalert2'
 import Link from 'next/link'
-import Image from "next/image";
+import Image from 'next/image'
 import { useSession } from 'next-auth/react'
+import { useSearchParams, useRouter } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,6 +23,14 @@ export default function Page() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const suggestionsRef = useRef(null);
   const { data: session } = useSession();
+const searchParams = useSearchParams()
+const router = useRouter()
+
+
+useEffect(() => {
+  const cat = searchParams?.get('category')
+  if (cat) setSelectedCategory(cat)
+}, [searchParams])
 
 const fetchProducts = async () => {
   try {
@@ -277,6 +286,7 @@ const fetchProducts = async () => {
             </select>
           </div>
 
+
           {/* Clear filters */}
           <div className="flex gap-2">
             <button
@@ -329,13 +339,19 @@ const fetchProducts = async () => {
                 )}
 
                 <figure className="relative">
-                  <img
+                    <Link href={`products/${item._id}`}>
+
+                  <Image
                     src={item?.imageUrl || "https://i.ibb.co/NgmXvV1k/david-barros-fm-IXg-QUo-MZg-unsplash.jpg"}
                     alt={item?.productName}
+                      width={5000}             
+                      height={5000}   
+
                     className="h-60 min-w-75 transition-transform duration-300 group-hover:scale-105"
                   />
+                  </Link>
                   {item.stockQuantity === 0 && (
-                    <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
+                    <div className="absolute inset-0  bg-opacity-60 flex items-center justify-center">
                       <span className="text-white font-bold text-xl bg-red-500 px-4 py-2 rounded">OUT OF STOCK</span>
                     </div>
                   )}
@@ -357,7 +373,7 @@ const fetchProducts = async () => {
 
                   <div className="mt-2">
                     <div className="flex items-center gap-2">
-                      {item.regularPrice > (item.todayPrice || item.price) ? (
+                      {item.regularPrice > (item?.todayPrice || item?.price) ? (
                         <>
                           <span className="text-2xl font-bold text-green-700">
                             ${parseFloat(item.todayPrice || item.price)}
@@ -391,6 +407,7 @@ const fetchProducts = async () => {
                   </div>
                 </div>
 
+
          {/* action buttons: View always shown; Edit/Delete only for owner or admin */}
 <div className="absolute top-8 right-2 flex flex-col space-y-2 transition">
   <Link href={`products/${item._id}`}>
@@ -400,7 +417,7 @@ const fetchProducts = async () => {
   </Link>
 
   { /* compute permissions: owner OR admin */ }
-  { session && (session.user?.email === item.businessEmail || session.user?.role === 'admin') && (
+  { session && (session.user?.email === item?.businessEmail || session.user?.role === 'admin') && (
     <>
       <button
         onClick={() => handleEditClick(item)}

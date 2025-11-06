@@ -130,11 +130,11 @@ export default function PaymentSuccess() {
 
         <div className="space-y-3">
           <Link
-            href="/dashboard"
+            href="/"
             className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition flex items-center justify-center gap-2 font-medium"
           >
             <ShoppingBag className="w-5 h-5" />
-            Go to Dashboard
+            Home
           </Link>
           
           <Link

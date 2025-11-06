@@ -10,7 +10,6 @@ import { useCart } from '../Provider/CartContext/CartContext'
 const Navbar = () => {
   const { data: session } = useSession()
 const { cartCount, hideBadge } = useCart() || { cartCount: 0, hideBadge: true }
-console.log('Navbar cartCount', cartCount)
 
   const dashboardLink =
     session?.user?.role === 'admin' ? '/admin-dashboard' : '/user-dashboard'
