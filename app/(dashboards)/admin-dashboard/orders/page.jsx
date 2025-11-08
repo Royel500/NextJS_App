@@ -187,36 +187,53 @@ export default function AdminOrdersPage() {
                       <td className="px-4 py-3 text-sm font-semibold">{status}</td>
                       <td className="px-4 py-3 text-sm">{created}</td>
 
-                      <td className="px-4 py-3 text-right flex gap-2 justify-end">
-        
+           <td className="px-4 py-3 text-right flex gap-2 justify-end">
 
-                        <button
-                          onClick={() => handleAction(id, 'delivered')}
-                          disabled={processingId === id}
-                          className="px-3 py-1 rounded bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50"
-                        >
-                          {processingId === id ? 'Please wait' : 'Delivered'}
-                        </button>
+  {/* Delivered button wrapper (handles tooltip hover even when button is disabled) */}
+  <div className="relative group">
+    <button
+      onClick={() => handleAction(id, 'delivered')}
+      disabled={processingId === id || status === 'pending' || status === 'delivered'}
+      className={`px-3 py-1 rounded text-white ${
+        processingId === id || status === 'pending' || status === 'delivered'
+          ? 'bg-gray-400 cursor-not-allowed'
+          : 'bg-indigo-600 hover:bg-indigo-700'
+      }`}
+      aria-disabled={processingId === id || status === 'pending' || status === 'delivered'}
+    >
+      {processingId === id ? 'Please wait' : 'Delivered'}
+    </button>
 
-                        <a
-                          href={waLink(order.userNumber)}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="px-3 py-1 rounded bg-blue-500 text-white hover:bg-blue-600"
-                        >
-                          Contact
-                        </a>
+    {/* Tooltip: visible when hovering the wrapper (group) */}
+    {(status === 'pending' || status === 'delivered' || processingId === id) && (
+      <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 text-xs whitespace-nowrap bg-black text-white px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+        Don’t allow
+      </span>
+    )}
+  </div>
 
-                        <button
-                          onClick={() => handleDelete(id)}
-                          className="px-3 py-1 rounded bg-red-500 text-white hover:bg-red-600"
-                        >
-                          Delete
-                        </button>
-                      </td>
+  <a
+    href={waLink(order.userNumber)}
+    target="_blank"
+    rel="noreferrer"
+    className="px-3 py-1 rounded bg-blue-500 text-white hover:bg-blue-600"
+  >
+    Contact
+  </a>
+
+  <button
+    onClick={() => handleDelete(id)}
+    className="px-3 py-1 rounded bg-red-500 text-white hover:bg-red-600"
+  >
+    Delete
+  </button>
+</td>
+
+
                     </tr>
                   )
                 })}
+
               </tbody>
             </table>
           </div>

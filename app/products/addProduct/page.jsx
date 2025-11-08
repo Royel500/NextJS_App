@@ -23,7 +23,7 @@ const categories = [
   "Electronics",
   "Fashion",
   "Home & Kitchen",
-  "Beauty & Personal Care",
+  "Beauty Products",
   "Sports & Outdoors",
   "Toys & Games",
   "Automotive",

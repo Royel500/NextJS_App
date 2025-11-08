@@ -41,7 +41,7 @@ export default function CountdownSection() {
 
   const products = [
     {
-      title: "Electronics Sale",
+      title: "Electronics",
       description: "Premium gadgets",
       discount: "30%",
       originalPrice: "$289",
@@ -50,7 +50,7 @@ export default function CountdownSection() {
       buttonColor: "bg-sky-500 hover:bg-blue-500"
     },
     {
-      title: "Fashion Deal",
+      title: "Fashion",
       description: "Trendy collection",
       discount: "25%",
       originalPrice: "$105",
@@ -59,7 +59,7 @@ export default function CountdownSection() {
       buttonColor: "bg-sky-500 hover:bg-blue-600"
     },
     {
-      title: "Home Essentials",
+      title: "Home & Kitchen",
       description: "Quality items",
       discount: "40%",
       originalPrice: "$249",
@@ -124,11 +124,14 @@ export default function CountdownSection() {
                     </div>
                   </div>
                 </div>
-            <Link href={'/products'}>
-                <button className={`w-full ${product.buttonColor} text-white py-2 rounded-lg font-semibold transition`}>
-                  Shop Now
-                </button>
-                </Link>
+  <Link href={`/products?category=${encodeURIComponent(product.title)}`}>
+  <button
+    className={`w-full ${product.buttonColor} text-white py-2 rounded-lg font-semibold transition`}
+  >
+    Shop Now
+  </button>
+</Link>
+
          
               </div>
             </div>

@@ -203,25 +203,45 @@ export default function AdminOrdersPage() {
                       <td className="px-4 py-3 text-sm font-semibold">{status}</td>
                       <td className="px-4 py-3 text-sm">{created}</td>
 
-                      <td className="px-4 py-3 text-right flex gap-2 justify-end">
-                        <button
-                          onClick={() => handleAction(id, 'confirmed')}
-                          disabled={processingId === id}
-                          className="px-3 py-1 rounded bg-green-600 text-white hover:bg-green-700 disabled:opacity-50"
-                        >
-                          {processingId === id ? 'Please wait' : 'Confirm'}
-                        </button>
+<td className="px-4 py-3 text-right flex gap-2 justify-end">
 
-      
+  {/* Confirm Button */}
+  <div className="relative group">
+    <button
+      onClick={() => handleAction(id, 'confirmed')}
+      disabled={processingId === id || status === 'confirmed'}
+      className={`px-3 py-1 rounded text-white ${
+        processingId === id || status === 'confirmed'
+          ? 'bg-gray-400 cursor-not-allowed'
+          : 'bg-green-600 hover:bg-green-700'
+      }`}
+    >
+      {processingId === id ? 'Please wait' : 'Confirm'}
+    </button>
+
+    {(status === 'confirmed' || processingId === id) && (
+      <span className="absolute -top-8 left-1/2 -translate-x-1/2 text-xs whitespace-nowrap bg-black text-white px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+        Don’t allow
+      </span>
+    )}
+  </div>
+
+  {/* Delete Button */}
+  <div className="relative group">
+    <button
+      onClick={() => handleDelete(id)}
+      className={`px-3 py-1 rounded text-white ${
+      'bg-red-500 hover:bg-red-600'
+      }`}
+    >
+      Delete
+    </button>
 
 
-                        <button
-                          onClick={() => handleDelete(id)}
-                          className="px-3 py-1 rounded bg-red-500 text-white hover:bg-red-600"
-                        >
-                          Delete
-                        </button>
-                      </td>
+  </div>
+
+</td>
+
                     </tr>
                   )
                 })}

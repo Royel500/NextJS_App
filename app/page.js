@@ -9,6 +9,7 @@ import Swal from "sweetalert2";
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { addToCart } from "./api/utils/route";
+import Slider from "./Components/Slider";
 
 export default function Home() {
   const [products, setProducts] = useState([]);
@@ -60,25 +61,7 @@ export default function Home() {
 
   return (
     <section className="min-h-screen">
-      {/* Hero Section */}
-      <div
-  className="relative bg-cover bg-center text-purple-700  py-32"
-  style={{ backgroundImage: "url('https://i.postimg.cc/QdKptw32/image.png')" }}
->
-  <div className=" lg:mx-80 mx-2 rounded-2xl bg-green-50  p-4 text-center">
-    <h1 className="text-2xl md:text-5xl font-bold mb-6">Discover Amazing Products</h1>
-    <p className="font-bold mb-2 max-w-2xl mx-auto">
-      Find everything you need with our curated collection of premium products at unbeatable prices.
-    </p>
-    <Link href={'/products'}>
-        <button className="bg-green-600 text-white font-bold py-3 px-8 
-    rounded-full text-lg ">
-      Shop Now
-    </button>
-    </Link>
-
-  </div>
-</div>
+<Slider></Slider>
 
 
       {/* Featured Categories */}
